@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # 1. PostgreSQL (Central DB for microservices)
+  postgres:
+    image: postgres:16-alpine
+    container_name: fleetbridge-postgres
+    environment:
+      POSTGRES_USER: fleetbridge_user
+      POSTGRES_PASSWORD: fleetbridge_password
+      POSTGRES_DB: fleetbridge_master
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  # 2. Redis (Caching & QR Validation)
+  redis:
+    image: redis:7.2-alpine
+    container_name: fleetbridge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  # 3. Keycloak (Identity Provider for OIDC/OAuth2)
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: fleetbridge-keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: fleetbridge_user
+      KC_DB_PASSWORD: fleetbridge_password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "8080:8080"
+    command: start-dev
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+networks:
+  fleetbridge-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:

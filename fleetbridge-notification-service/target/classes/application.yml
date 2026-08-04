@@ -1,0 +1,13 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: fleetbridge-notification-service
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/fleetbridge-master
+          jwk-set-uri: http://localhost:8080/realms/fleetbridge-master/protocol/openid-connect/certs

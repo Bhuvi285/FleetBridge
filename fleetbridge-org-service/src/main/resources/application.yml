@@ -1,0 +1,29 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: fleetbridge-org-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fleetbridge_org_db
+    username: fleetbridge_user
+    password: fleetbridge_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate # Flyway manages schema
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+    show-sql: true
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/fleetbridge-master
+          jwk-set-uri: http://localhost:8080/realms/fleetbridge-master/protocol/openid-connect/certs
