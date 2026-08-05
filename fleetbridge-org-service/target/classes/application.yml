@@ -5,7 +5,7 @@ spring:
   application:
     name: fleetbridge-org-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/fleetbridge_org_db
+    url: jdbc:postgresql://127.0.0.1:5432/fleetbridge_org_db
     username: fleetbridge_user
     password: fleetbridge_password
     driver-class-name: org.postgresql.Driver
