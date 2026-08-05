@@ -41,7 +41,9 @@ services:
       KEYCLOAK_ADMIN_PASSWORD: admin
     ports:
       - "8080:8080"
-    command: start-dev
+    volumes:
+      - ./keycloak-import:/opt/keycloak/data/import
+    command: start-dev --import-realm
     depends_on:
       - postgres
     restart: unless-stopped

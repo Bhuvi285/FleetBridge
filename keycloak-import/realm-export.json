@@ -1,0 +1,55 @@
+{
+  "realm": "fleetbridge-master",
+  "enabled": true,
+  "users": [
+    {
+      "username": "admin@fleetbridge.io",
+      "enabled": true,
+      "email": "admin@fleetbridge.io",
+      "firstName": "Admin",
+      "lastName": "User",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": [
+        "SUPER_ADMIN"
+      ]
+    }
+  ],
+  "roles": {
+    "realm": [
+      {
+        "name": "SUPER_ADMIN",
+        "description": "Super Administrator"
+      },
+      {
+        "name": "FLEET_MANAGER",
+        "description": "Fleet Manager"
+      }
+    ]
+  },
+  "clients": [
+    {
+      "clientId": "fleetbridge-web",
+      "enabled": true,
+      "clientAuthenticatorType": "client-secret",
+      "redirectUris": [
+        "http://localhost:4200/*"
+      ],
+      "webOrigins": [
+        "*"
+      ],
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "implicitFlowEnabled": false,
+      "directAccessGrantsEnabled": true,
+      "serviceAccountsEnabled": false,
+      "protocol": "openid-connect",
+      "fullScopeAllowed": true
+    }
+  ]
+}
