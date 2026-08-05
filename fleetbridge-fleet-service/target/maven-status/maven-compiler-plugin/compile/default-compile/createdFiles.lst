@@ -1,0 +1,7 @@
+com\fleetbridge\fleet\application\dto\VehicleResponse$VehicleResponseBuilder.class
+com\fleetbridge\fleet\application\mapper\FleetMapperImpl.class
+com\fleetbridge\fleet\domain\entity\Vehicle$VehicleBuilder.class
+com\fleetbridge\fleet\domain\entity\Driver$DriverBuilder.class
+com\fleetbridge\fleet\application\dto\DriverResponse$DriverResponseBuilder.class
+com\fleetbridge\fleet\application\dto\TravelCompanyResponse$TravelCompanyResponseBuilder.class
+com\fleetbridge\fleet\domain\entity\TravelCompany$TravelCompanyBuilder.class

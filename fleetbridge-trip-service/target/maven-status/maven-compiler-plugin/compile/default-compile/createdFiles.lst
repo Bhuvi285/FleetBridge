@@ -1,0 +1,6 @@
+com\fleetbridge\trip\domain\entity\TripInstance$TripInstanceBuilder.class
+com\fleetbridge\trip\application\dto\RouteResponse$RouteResponseBuilder.class
+com\fleetbridge\trip\domain\entity\Route$RouteBuilder.class
+com\fleetbridge\trip\domain\entity\RouteStop$RouteStopBuilder.class
+com\fleetbridge\trip\application\dto\TripResponse$TripResponseBuilder.class
+com\fleetbridge\trip\application\mapper\TripMapperImpl.class
