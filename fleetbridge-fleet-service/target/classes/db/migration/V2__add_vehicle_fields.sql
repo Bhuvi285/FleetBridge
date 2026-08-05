@@ -1,0 +1,2 @@
+ALTER TABLE vehicles ADD COLUMN year INT;
+ALTER TABLE vehicles ADD COLUMN type VARCHAR(50);

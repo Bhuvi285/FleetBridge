@@ -17,6 +17,9 @@ public class VehicleRequest {
 
     private String make;
     private String model;
+    
+    private Integer year;
+    private String type;
 
     @NotNull(message = "Seating capacity is required")
     @Positive(message = "Capacity must be positive")

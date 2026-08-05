@@ -33,6 +33,11 @@ public class FleetController {
 
     // --- Vehicle Endpoints ---
 
+    @GetMapping("/vehicles")
+    public ResponseEntity<ApiResponse<List<VehicleResponse>>> getAllVehicles() {
+        return ResponseEntity.ok(fleetService.getAllVehicles());
+    }
+
     @PostMapping("/vehicles")
     public ResponseEntity<ApiResponse<VehicleResponse>> registerVehicle(@Valid @RequestBody VehicleRequest request) {
         ApiResponse<VehicleResponse> response = fleetService.registerVehicle(request);

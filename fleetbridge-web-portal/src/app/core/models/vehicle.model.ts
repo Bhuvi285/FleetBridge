@@ -14,16 +14,16 @@ export enum VehicleStatus {
 
 export interface VehicleResponse {
   id: string;
-  tenantId: string;
-  licensePlate: string;
+  travelCompanyId: string;
+  registrationPlate: string;
   make: string;
   model: string;
   year: number;
-  type: VehicleType;
-  status: VehicleStatus;
-  capacityPayload: number;
-  createdAt: string;
-  updatedAt: string;
+  type: VehicleType | string;
+  seatingCapacity: number;
+  status: VehicleStatus | string;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface VehicleRequest {

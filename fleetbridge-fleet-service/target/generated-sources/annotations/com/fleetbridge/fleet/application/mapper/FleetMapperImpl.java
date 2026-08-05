@@ -1,0 +1,184 @@
+package com.fleetbridge.fleet.application.mapper;
+
+import com.fleetbridge.fleet.application.dto.DriverRequest;
+import com.fleetbridge.fleet.application.dto.DriverResponse;
+import com.fleetbridge.fleet.application.dto.TravelCompanyRequest;
+import com.fleetbridge.fleet.application.dto.TravelCompanyResponse;
+import com.fleetbridge.fleet.application.dto.VehicleRequest;
+import com.fleetbridge.fleet.application.dto.VehicleResponse;
+import com.fleetbridge.fleet.domain.entity.Driver;
+import com.fleetbridge.fleet.domain.entity.TravelCompany;
+import com.fleetbridge.fleet.domain.entity.Vehicle;
+import java.util.UUID;
+import javax.annotation.processing.Generated;
+import org.springframework.stereotype.Component;
+
+@Generated(
+    value = "org.mapstruct.ap.MappingProcessor",
+    date = "2026-08-05T23:38:47+0530",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
+)
+@Component
+public class FleetMapperImpl implements FleetMapper {
+
+    @Override
+    public TravelCompany toEntity(TravelCompanyRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        TravelCompany.TravelCompanyBuilder travelCompany = TravelCompany.builder();
+
+        travelCompany.tenantId( request.getTenantId() );
+        travelCompany.name( request.getName() );
+        travelCompany.registrationNumber( request.getRegistrationNumber() );
+
+        return travelCompany.build();
+    }
+
+    @Override
+    public TravelCompanyResponse toResponse(TravelCompany company) {
+        if ( company == null ) {
+            return null;
+        }
+
+        TravelCompanyResponse.TravelCompanyResponseBuilder travelCompanyResponse = TravelCompanyResponse.builder();
+
+        travelCompanyResponse.id( company.getId() );
+        travelCompanyResponse.tenantId( company.getTenantId() );
+        travelCompanyResponse.name( company.getName() );
+        travelCompanyResponse.registrationNumber( company.getRegistrationNumber() );
+
+        return travelCompanyResponse.build();
+    }
+
+    @Override
+    public Vehicle toEntity(VehicleRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        Vehicle.VehicleBuilder vehicle = Vehicle.builder();
+
+        vehicle.travelCompany( vehicleRequestToTravelCompany( request ) );
+        vehicle.registrationPlate( request.getRegistrationPlate() );
+        vehicle.make( request.getMake() );
+        vehicle.model( request.getModel() );
+        vehicle.year( request.getYear() );
+        vehicle.type( request.getType() );
+        vehicle.seatingCapacity( request.getSeatingCapacity() );
+
+        return vehicle.build();
+    }
+
+    @Override
+    public VehicleResponse toResponse(Vehicle vehicle) {
+        if ( vehicle == null ) {
+            return null;
+        }
+
+        VehicleResponse.VehicleResponseBuilder vehicleResponse = VehicleResponse.builder();
+
+        vehicleResponse.travelCompanyId( vehicleTravelCompanyId( vehicle ) );
+        vehicleResponse.id( vehicle.getId() );
+        vehicleResponse.registrationPlate( vehicle.getRegistrationPlate() );
+        vehicleResponse.make( vehicle.getMake() );
+        vehicleResponse.model( vehicle.getModel() );
+        vehicleResponse.year( vehicle.getYear() );
+        vehicleResponse.type( vehicle.getType() );
+        vehicleResponse.seatingCapacity( vehicle.getSeatingCapacity() );
+        vehicleResponse.status( vehicle.getStatus() );
+
+        return vehicleResponse.build();
+    }
+
+    @Override
+    public Driver toEntity(DriverRequest request) {
+        if ( request == null ) {
+            return null;
+        }
+
+        Driver.DriverBuilder driver = Driver.builder();
+
+        driver.travelCompany( driverRequestToTravelCompany( request ) );
+        driver.firstName( request.getFirstName() );
+        driver.lastName( request.getLastName() );
+        driver.licenseNumber( request.getLicenseNumber() );
+        driver.phoneNumber( request.getPhoneNumber() );
+
+        return driver.build();
+    }
+
+    @Override
+    public DriverResponse toResponse(Driver driver) {
+        if ( driver == null ) {
+            return null;
+        }
+
+        DriverResponse.DriverResponseBuilder driverResponse = DriverResponse.builder();
+
+        driverResponse.travelCompanyId( driverTravelCompanyId( driver ) );
+        driverResponse.id( driver.getId() );
+        driverResponse.firstName( driver.getFirstName() );
+        driverResponse.lastName( driver.getLastName() );
+        driverResponse.licenseNumber( driver.getLicenseNumber() );
+        driverResponse.phoneNumber( driver.getPhoneNumber() );
+        driverResponse.status( driver.getStatus() );
+
+        return driverResponse.build();
+    }
+
+    protected TravelCompany vehicleRequestToTravelCompany(VehicleRequest vehicleRequest) {
+        if ( vehicleRequest == null ) {
+            return null;
+        }
+
+        TravelCompany.TravelCompanyBuilder travelCompany = TravelCompany.builder();
+
+        travelCompany.id( vehicleRequest.getTravelCompanyId() );
+
+        return travelCompany.build();
+    }
+
+    private UUID vehicleTravelCompanyId(Vehicle vehicle) {
+        if ( vehicle == null ) {
+            return null;
+        }
+        TravelCompany travelCompany = vehicle.getTravelCompany();
+        if ( travelCompany == null ) {
+            return null;
+        }
+        UUID id = travelCompany.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
+
+    protected TravelCompany driverRequestToTravelCompany(DriverRequest driverRequest) {
+        if ( driverRequest == null ) {
+            return null;
+        }
+
+        TravelCompany.TravelCompanyBuilder travelCompany = TravelCompany.builder();
+
+        travelCompany.id( driverRequest.getTravelCompanyId() );
+
+        return travelCompany.build();
+    }
+
+    private UUID driverTravelCompanyId(Driver driver) {
+        if ( driver == null ) {
+            return null;
+        }
+        TravelCompany travelCompany = driver.getTravelCompany();
+        if ( travelCompany == null ) {
+            return null;
+        }
+        UUID id = travelCompany.getId();
+        if ( id == null ) {
+            return null;
+        }
+        return id;
+    }
+}

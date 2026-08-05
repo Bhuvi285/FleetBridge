@@ -4,8 +4,10 @@ import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { VehicleService } from '../../core/services/vehicle.service';
 import { VehicleResponse } from '../../core/models/vehicle.model';
+import { AddVehicleDialogComponent } from './components/add-vehicle-dialog/add-vehicle-dialog.component';
 
 @Component({
   selector: 'app-vehicles',
@@ -15,7 +17,8 @@ import { VehicleResponse } from '../../core/models/vehicle.model';
     MatTableModule, 
     MatButtonModule, 
     MatIconModule,
-    MatProgressSpinnerModule
+    MatProgressSpinnerModule,
+    MatDialogModule
   ],
   template: `
     <div class="page-header">
@@ -24,7 +27,7 @@ import { VehicleResponse } from '../../core/models/vehicle.model';
         <p class="page-subtitle">Manage your enterprise fleet assets</p>
       </div>
       <button mat-flat-button class="btn-primary" (click)="openAddVehicleDialog()">
-        <mat-icon>add</mat-icon> Add Vehicle
+        Add Vehicle
       </button>
     </div>
 
@@ -51,7 +54,7 @@ import { VehicleResponse } from '../../core/models/vehicle.model';
         <ng-container matColumnDef="licensePlate">
           <th mat-header-cell *matHeaderCellDef> License Plate </th>
           <td mat-cell *matCellDef="let element" class="font-bold"> 
-            {{ element.licensePlate }} 
+            {{ element.registrationPlate }} 
           </td>
         </ng-container>
 
@@ -245,6 +248,7 @@ import { VehicleResponse } from '../../core/models/vehicle.model';
 })
 export class VehiclesComponent implements OnInit {
   private vehicleService = inject(VehicleService);
+  private dialog = inject(MatDialog);
   
   displayedColumns: string[] = ['status', 'licensePlate', 'makeModel', 'type', 'actions'];
   vehicles: VehicleResponse[] = [];
@@ -270,8 +274,17 @@ export class VehiclesComponent implements OnInit {
   }
 
   openAddVehicleDialog(): void {
-    // Stub for now. We will add a MatDialog later.
-    console.log('Open Add Vehicle Dialog');
+    const dialogRef = this.dialog.open(AddVehicleDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      panelClass: 'glass-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadVehicles(); // Refresh table if vehicle was created
+      }
+    });
   }
 
   deleteVehicle(id: string): void {

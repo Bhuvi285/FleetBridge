@@ -19,6 +19,20 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path=/api/v1/trip/**
+      
+      globalcors:
+        corsConfigurations:
+          '[/**]':
+            allowedOrigins: "http://localhost:4200"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+              - PATCH
+            allowedHeaders: "*"
+            allowCredentials: true
             
   security:
     oauth2:

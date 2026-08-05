@@ -32,6 +32,9 @@ public class Vehicle {
 
     private String make;
     private String model;
+    
+    private Integer year;
+    private String type;
 
     @Column(name = "seating_capacity", nullable = false)
     private Integer seatingCapacity;

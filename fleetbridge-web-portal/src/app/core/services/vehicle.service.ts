@@ -1,8 +1,14 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { VehicleResponse, VehicleRequest } from '../models/vehicle.model';
 import { environment } from '../../../environments/environment';
+
+interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,22 +19,31 @@ export class VehicleService {
   private apiUrl = `${environment.apiBaseUrl}/api/v1/fleet/vehicles`;
 
   getVehicles(): Observable<VehicleResponse[]> {
-    return this.http.get<VehicleResponse[]>(this.apiUrl);
+    return this.http.get<ApiResponse<VehicleResponse[]>>(this.apiUrl).pipe(
+      map(response => response.data || [])
+    );
   }
 
   getVehicleById(id: string): Observable<VehicleResponse> {
-    return this.http.get<VehicleResponse>(`${this.apiUrl}/${id}`);
+    return this.http.get<ApiResponse<VehicleResponse>>(`${this.apiUrl}/${id}`).pipe(
+      map(response => response.data)
+    );
   }
 
   createVehicle(vehicle: VehicleRequest): Observable<VehicleResponse> {
-    return this.http.post<VehicleResponse>(this.apiUrl, vehicle);
+    return this.http.post<ApiResponse<VehicleResponse>>(this.apiUrl, vehicle).pipe(
+      map(response => response.data)
+    );
   }
 
   updateVehicle(id: string, vehicle: VehicleRequest): Observable<VehicleResponse> {
-    return this.http.put<VehicleResponse>(`${this.apiUrl}/${id}`, vehicle);
+    return this.http.put<ApiResponse<VehicleResponse>>(`${this.apiUrl}/${id}`, vehicle).pipe(
+      map(response => response.data)
+    );
   }
 
   deleteVehicle(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`);
   }
 }
+

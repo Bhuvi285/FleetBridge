@@ -42,15 +42,37 @@ public class FleetService {
 
     // --- Vehicle Operations ---
 
+    public ApiResponse<List<VehicleResponse>> getAllVehicles() {
+        List<VehicleResponse> vehicles = vehicleRepository.findAll().stream()
+                .map(fleetMapper::toResponse)
+                .collect(Collectors.toList());
+        return ApiResponse.success(vehicles, "Vehicles retrieved successfully");
+    }
+
     public ApiResponse<VehicleResponse> registerVehicle(VehicleRequest request) {
-        if (!travelCompanyRepository.existsById(request.getTravelCompanyId())) {
-            return ApiResponse.error("Travel Company not found");
+        TravelCompany company;
+        if (request.getTravelCompanyId() != null && travelCompanyRepository.existsById(request.getTravelCompanyId())) {
+            company = travelCompanyRepository.findById(request.getTravelCompanyId()).orElseThrow();
+        } else {
+            company = travelCompanyRepository.findAll().stream().findFirst().orElseGet(() -> {
+                TravelCompany newCompany = TravelCompany.builder()
+                        .tenantId("default-tenant")
+                        .name("Default Fleet Company")
+                        .registrationNumber("REG-001")
+                        .build();
+                return travelCompanyRepository.save(newCompany);
+            });
+            request.setTravelCompanyId(company.getId());
         }
+
         if (vehicleRepository.existsByRegistrationPlate(request.getRegistrationPlate())) {
             return ApiResponse.error("Registration plate already exists");
         }
         Vehicle vehicle = fleetMapper.toEntity(request);
-        vehicle.setStatus("ACTIVE");
+        vehicle.setTravelCompany(company);
+        if (vehicle.getStatus() == null) {
+            vehicle.setStatus("AVAILABLE");
+        }
         vehicle = vehicleRepository.save(vehicle);
         return ApiResponse.success(fleetMapper.toResponse(vehicle), "Vehicle registered successfully");
     }

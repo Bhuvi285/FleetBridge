@@ -56,3 +56,20 @@ html, body {
 ::-webkit-scrollbar-thumb:hover {
   background: var(--text-muted);
 }
+
+/* Material Dialog Overrides for FleetBridge custom dialog */
+.glass-dialog .mdc-dialog__surface {
+  background: transparent !important;
+  box-shadow: none !important;
+  border-radius: 20px !important;
+  overflow: visible !important;
+}
+
+.glass-dialog .mat-mdc-dialog-container {
+  padding: 0 !important;
+  overflow: visible !important;
+}
+
+.glass-dialog .mat-mdc-dialog-surface {
+  overflow: visible !important;
+}
