@@ -16,7 +16,7 @@ export interface ApiResponse<T> {
 })
 export class DriverService {
   private http = inject(HttpClient);
-  private apiUrl = `${environment.apiUrl}/api/v1/fleet/drivers`;
+  private apiUrl = `${environment.apiBaseUrl}/api/v1/fleet/drivers`;
 
   getDrivers(): Observable<DriverResponse[]> {
     return this.http.get<ApiResponse<DriverResponse[]>>(this.apiUrl).pipe(

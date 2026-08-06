@@ -77,6 +77,34 @@ public class FleetService {
         return ApiResponse.success(fleetMapper.toResponse(vehicle), "Vehicle registered successfully");
     }
 
+    public ApiResponse<VehicleResponse> updateVehicle(UUID vehicleId, VehicleRequest request) {
+        Vehicle vehicle = vehicleRepository.findById(vehicleId).orElse(null);
+        if (vehicle == null) {
+            return ApiResponse.error("Vehicle not found with id: " + vehicleId);
+        }
+        // Check plate uniqueness only if it changed
+        if (!vehicle.getRegistrationPlate().equals(request.getRegistrationPlate())
+                && vehicleRepository.existsByRegistrationPlate(request.getRegistrationPlate())) {
+            return ApiResponse.error("Registration plate already exists");
+        }
+        vehicle.setRegistrationPlate(request.getRegistrationPlate());
+        vehicle.setMake(request.getMake());
+        vehicle.setModel(request.getModel());
+        vehicle.setYear(request.getYear());
+        vehicle.setType(request.getType());
+        vehicle.setSeatingCapacity(request.getSeatingCapacity());
+        vehicle = vehicleRepository.save(vehicle);
+        return ApiResponse.success(fleetMapper.toResponse(vehicle), "Vehicle updated successfully");
+    }
+
+    public ApiResponse<Void> deleteVehicle(UUID vehicleId) {
+        if (!vehicleRepository.existsById(vehicleId)) {
+            return ApiResponse.error("Vehicle not found with id: " + vehicleId);
+        }
+        vehicleRepository.deleteById(vehicleId);
+        return ApiResponse.success(null, "Vehicle deleted successfully");
+    }
+
     public ApiResponse<List<VehicleResponse>> getVehiclesByCompany(UUID companyId) {
         List<VehicleResponse> vehicles = vehicleRepository.findByTravelCompanyId(companyId).stream()
                 .map(fleetMapper::toResponse)
@@ -126,5 +154,31 @@ public class FleetService {
                 .map(fleetMapper::toResponse)
                 .collect(Collectors.toList());
         return ApiResponse.success(drivers, "Drivers retrieved successfully");
+    }
+
+    public ApiResponse<DriverResponse> updateDriver(UUID driverId, DriverRequest request) {
+        Driver driver = driverRepository.findById(driverId).orElse(null);
+        if (driver == null) {
+            return ApiResponse.error("Driver not found with id: " + driverId);
+        }
+        // Check license uniqueness only if it changed
+        if (!driver.getLicenseNumber().equals(request.getLicenseNumber())
+                && driverRepository.existsByLicenseNumber(request.getLicenseNumber())) {
+            return ApiResponse.error("License number already exists");
+        }
+        driver.setFirstName(request.getFirstName());
+        driver.setLastName(request.getLastName());
+        driver.setLicenseNumber(request.getLicenseNumber());
+        driver.setPhoneNumber(request.getPhoneNumber());
+        driver = driverRepository.save(driver);
+        return ApiResponse.success(fleetMapper.toResponse(driver), "Driver updated successfully");
+    }
+
+    public ApiResponse<Void> deleteDriver(UUID driverId) {
+        if (!driverRepository.existsById(driverId)) {
+            return ApiResponse.error("Driver not found with id: " + driverId);
+        }
+        driverRepository.deleteById(driverId);
+        return ApiResponse.success(null, "Driver deleted successfully");
     }
 }

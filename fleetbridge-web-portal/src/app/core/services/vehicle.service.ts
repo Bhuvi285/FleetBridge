@@ -42,8 +42,8 @@ export class VehicleService {
     );
   }
 
-  deleteVehicle(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+  deleteVehicle(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
   }
 }
 
