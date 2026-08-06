@@ -51,6 +51,11 @@ public class FleetController {
 
     // --- Driver Endpoints ---
 
+    @GetMapping("/drivers")
+    public ResponseEntity<ApiResponse<List<DriverResponse>>> getAllDrivers() {
+        return ResponseEntity.ok(fleetService.getAllDrivers());
+    }
+
     @PostMapping("/drivers")
     public ResponseEntity<ApiResponse<DriverResponse>> onboardDriver(@Valid @RequestBody DriverRequest request) {
         ApiResponse<DriverResponse> response = fleetService.onboardDriver(request);

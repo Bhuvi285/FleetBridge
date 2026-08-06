@@ -87,16 +87,38 @@ public class FleetService {
     // --- Driver Operations ---
 
     public ApiResponse<DriverResponse> onboardDriver(DriverRequest request) {
-        if (!travelCompanyRepository.existsById(request.getTravelCompanyId())) {
-            return ApiResponse.error("Travel Company not found");
+        TravelCompany company;
+        if (request.getTravelCompanyId() != null && travelCompanyRepository.existsById(request.getTravelCompanyId())) {
+            company = travelCompanyRepository.findById(request.getTravelCompanyId()).get();
+        } else {
+            company = travelCompanyRepository.findAll().stream().findFirst().orElseGet(() -> {
+                TravelCompany newCompany = TravelCompany.builder()
+                        .tenantId("DEFAULT")
+                        .name("Default Fleet Company")
+                        .registrationNumber("REG-001")
+                        .build();
+                return travelCompanyRepository.save(newCompany);
+            });
+            request.setTravelCompanyId(company.getId());
         }
+
         if (driverRepository.existsByLicenseNumber(request.getLicenseNumber())) {
             return ApiResponse.error("License number already exists");
         }
         Driver driver = fleetMapper.toEntity(request);
-        driver.setStatus("ACTIVE");
+        driver.setTravelCompany(company);
+        if (driver.getStatus() == null) {
+            driver.setStatus("ACTIVE");
+        }
         driver = driverRepository.save(driver);
         return ApiResponse.success(fleetMapper.toResponse(driver), "Driver onboarded successfully");
+    }
+
+    public ApiResponse<List<DriverResponse>> getAllDrivers() {
+        List<DriverResponse> drivers = driverRepository.findAll().stream()
+                .map(fleetMapper::toResponse)
+                .collect(Collectors.toList());
+        return ApiResponse.success(drivers, "Drivers retrieved successfully");
     }
 
     public ApiResponse<List<DriverResponse>> getDriversByCompany(UUID companyId) {
