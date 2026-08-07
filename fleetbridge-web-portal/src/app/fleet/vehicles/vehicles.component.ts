@@ -76,7 +76,7 @@ import { AddVehicleDialogComponent } from './components/add-vehicle-dialog/add-v
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="text-right"> Actions </th>
           <td mat-cell *matCellDef="let element" class="text-right">
-            <button mat-icon-button color="primary">
+            <button mat-icon-button color="primary" (click)="openEditVehicleDialog(element)">
               <mat-icon>edit</mat-icon>
             </button>
             <button mat-icon-button color="warn" (click)="deleteVehicle(element.id)">
@@ -283,6 +283,21 @@ export class VehiclesComponent implements OnInit {
     dialogRef.afterClosed().subscribe(result => {
       if (result) {
         this.loadVehicles(); // Refresh table if vehicle was created
+      }
+    });
+  }
+
+  openEditVehicleDialog(vehicle: VehicleResponse): void {
+    const dialogRef = this.dialog.open(AddVehicleDialogComponent, {
+      width: '600px',
+      disableClose: true,
+      panelClass: 'glass-dialog',
+      data: { vehicle }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadVehicles();
       }
     });
   }

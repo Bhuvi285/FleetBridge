@@ -78,10 +78,10 @@ import { AddDriverDialogComponent } from './components/add-driver-dialog/add-dri
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="text-right"> Actions </th>
           <td mat-cell *matCellDef="let element" class="text-right">
-            <button mat-icon-button color="primary">
+            <button mat-icon-button color="primary" (click)="openEditDriverDialog(element)">
               <mat-icon>edit</mat-icon>
             </button>
-            <button mat-icon-button color="warn">
+            <button mat-icon-button color="warn" (click)="deleteDriver(element.id)">
               <mat-icon>delete</mat-icon>
             </button>
           </td>
@@ -233,5 +233,29 @@ export class DriversComponent implements OnInit {
         this.loadDrivers();
       }
     });
+  }
+
+  openEditDriverDialog(driver: DriverResponse): void {
+    const dialogRef = this.dialog.open(AddDriverDialogComponent, {
+      panelClass: 'glass-dialog',
+      width: '560px',
+      disableClose: false,
+      data: { driver }
+    });
+
+    dialogRef.afterClosed().subscribe((result) => {
+      if (result) {
+        this.loadDrivers();
+      }
+    });
+  }
+
+  deleteDriver(id: string): void {
+    if (confirm('Are you sure you want to remove this driver?')) {
+      this.driverService.deleteDriver(id).subscribe({
+        next: () => this.loadDrivers(),
+        error: (err) => console.error('Error deleting driver', err)
+      });
+    }
   }
 }

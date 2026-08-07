@@ -15,8 +15,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-08-06T21:07:44+0530",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260528-0407, environment: Java 21.0.11 (Eclipse Adoptium)"
+    date = "2026-08-07T17:27:33+0530",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
 )
 @Component
 public class FleetMapperImpl implements FleetMapper {
@@ -29,9 +29,9 @@ public class FleetMapperImpl implements FleetMapper {
 
         TravelCompany.TravelCompanyBuilder travelCompany = TravelCompany.builder();
 
+        travelCompany.tenantId( request.getTenantId() );
         travelCompany.name( request.getName() );
         travelCompany.registrationNumber( request.getRegistrationNumber() );
-        travelCompany.tenantId( request.getTenantId() );
 
         return travelCompany.build();
     }
@@ -45,9 +45,9 @@ public class FleetMapperImpl implements FleetMapper {
         TravelCompanyResponse.TravelCompanyResponseBuilder travelCompanyResponse = TravelCompanyResponse.builder();
 
         travelCompanyResponse.id( company.getId() );
+        travelCompanyResponse.tenantId( company.getTenantId() );
         travelCompanyResponse.name( company.getName() );
         travelCompanyResponse.registrationNumber( company.getRegistrationNumber() );
-        travelCompanyResponse.tenantId( company.getTenantId() );
 
         return travelCompanyResponse.build();
     }
@@ -61,12 +61,12 @@ public class FleetMapperImpl implements FleetMapper {
         Vehicle.VehicleBuilder vehicle = Vehicle.builder();
 
         vehicle.travelCompany( vehicleRequestToTravelCompany( request ) );
+        vehicle.registrationPlate( request.getRegistrationPlate() );
         vehicle.make( request.getMake() );
         vehicle.model( request.getModel() );
-        vehicle.registrationPlate( request.getRegistrationPlate() );
-        vehicle.seatingCapacity( request.getSeatingCapacity() );
-        vehicle.type( request.getType() );
         vehicle.year( request.getYear() );
+        vehicle.type( request.getType() );
+        vehicle.seatingCapacity( request.getSeatingCapacity() );
 
         return vehicle.build();
     }
@@ -81,13 +81,13 @@ public class FleetMapperImpl implements FleetMapper {
 
         vehicleResponse.travelCompanyId( vehicleTravelCompanyId( vehicle ) );
         vehicleResponse.id( vehicle.getId() );
+        vehicleResponse.registrationPlate( vehicle.getRegistrationPlate() );
         vehicleResponse.make( vehicle.getMake() );
         vehicleResponse.model( vehicle.getModel() );
-        vehicleResponse.registrationPlate( vehicle.getRegistrationPlate() );
+        vehicleResponse.year( vehicle.getYear() );
+        vehicleResponse.type( vehicle.getType() );
         vehicleResponse.seatingCapacity( vehicle.getSeatingCapacity() );
         vehicleResponse.status( vehicle.getStatus() );
-        vehicleResponse.type( vehicle.getType() );
-        vehicleResponse.year( vehicle.getYear() );
 
         return vehicleResponse.build();
     }
@@ -118,8 +118,8 @@ public class FleetMapperImpl implements FleetMapper {
         DriverResponse.DriverResponseBuilder driverResponse = DriverResponse.builder();
 
         driverResponse.travelCompanyId( driverTravelCompanyId( driver ) );
-        driverResponse.firstName( driver.getFirstName() );
         driverResponse.id( driver.getId() );
+        driverResponse.firstName( driver.getFirstName() );
         driverResponse.lastName( driver.getLastName() );
         driverResponse.licenseNumber( driver.getLicenseNumber() );
         driverResponse.phoneNumber( driver.getPhoneNumber() );

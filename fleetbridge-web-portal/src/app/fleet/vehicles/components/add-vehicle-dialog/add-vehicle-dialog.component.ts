@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
-import { MatDialogRef, MatDialogModule } from '@angular/material/dialog';
+import { MatDialogRef, MatDialogModule, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { VehicleService } from '../../../../core/services/vehicle.service';
+import { VehicleResponse } from '../../../../core/models/vehicle.model';
 
 @Component({
   selector: 'app-add-vehicle-dialog',
@@ -27,8 +28,8 @@ import { VehicleService } from '../../../../core/services/vehicle.service';
           <mat-icon>directions_car</mat-icon>
         </div>
         <div>
-          <h2 class="dialog-title">Add New Vehicle</h2>
-          <p class="dialog-subtitle">Register a new vehicle to your fleet</p>
+          <h2 class="dialog-title">{{ editVehicle ? 'Edit Vehicle' : 'Add New Vehicle' }}</h2>
+          <p class="dialog-subtitle">{{ editVehicle ? 'Update vehicle details' : 'Register a new vehicle to your fleet' }}</p>
         </div>
         <button class="close-btn" mat-dialog-close>
           <mat-icon>close</mat-icon>
@@ -102,7 +103,7 @@ import { VehicleService } from '../../../../core/services/vehicle.service';
         <button class="btn-cancel" mat-dialog-close>Cancel</button>
         <button class="btn-submit" [disabled]="vehicleForm.invalid || isSubmitting" (click)="onSubmit()">
           <mat-spinner *ngIf="isSubmitting" diameter="18"></mat-spinner>
-          <span>{{ isSubmitting ? 'Adding...' : 'Add Vehicle' }}</span>
+          <span>{{ isSubmitting ? (editVehicle ? 'Saving...' : 'Adding...') : (editVehicle ? 'Save Changes' : 'Add Vehicle') }}</span>
         </button>
       </div>
 
@@ -354,19 +355,21 @@ export class AddVehicleDialogComponent {
   private fb = inject(FormBuilder);
   private vehicleService = inject(VehicleService);
   private dialogRef = inject(MatDialogRef<AddVehicleDialogComponent>);
+  private dialogData = inject<{ vehicle?: VehicleResponse }>(MAT_DIALOG_DATA, { optional: true });
 
+  editVehicle: VehicleResponse | null = this.dialogData?.vehicle ?? null;
   isSubmitting = false;
   errorMessage: string | null = null;
 
   vehicleForm: FormGroup = this.fb.group({
-    travelCompanyId: ['123e4567-e89b-12d3-a456-426614174000'],
-    registrationPlate: ['', Validators.required],
-    make: ['', Validators.required],
-    model: ['', Validators.required],
-    year: [new Date().getFullYear(), [Validators.required, Validators.min(1990)]],
-    seatingCapacity: [4, [Validators.required, Validators.min(1)]],
-    type: ['CAR', Validators.required],
-    status: ['AVAILABLE']
+    travelCompanyId: [this.editVehicle?.travelCompanyId ?? '123e4567-e89b-12d3-a456-426614174000'],
+    registrationPlate: [this.editVehicle?.registrationPlate ?? '', Validators.required],
+    make: [this.editVehicle?.make ?? '', Validators.required],
+    model: [this.editVehicle?.model ?? '', Validators.required],
+    year: [this.editVehicle?.year ?? new Date().getFullYear(), [Validators.required, Validators.min(1990)]],
+    seatingCapacity: [this.editVehicle?.seatingCapacity ?? 4, [Validators.required, Validators.min(1)]],
+    type: [this.editVehicle?.type ?? 'CAR', Validators.required],
+    status: [this.editVehicle?.status ?? 'AVAILABLE']
   });
 
   onSubmit(): void {
@@ -379,15 +382,19 @@ export class AddVehicleDialogComponent {
 
     this.isSubmitting = true;
 
-    this.vehicleService.createVehicle(this.vehicleForm.value).subscribe({
+    const action$ = this.editVehicle
+      ? this.vehicleService.updateVehicle(this.editVehicle.id, this.vehicleForm.value)
+      : this.vehicleService.createVehicle(this.vehicleForm.value);
+
+    action$.subscribe({
       next: () => {
         this.isSubmitting = false;
         this.dialogRef.close(true);
       },
       error: (err) => {
-        console.error('Failed to create vehicle', err);
+        console.error('Failed to save vehicle', err);
         this.isSubmitting = false;
-        this.errorMessage = err?.error?.message || err?.message || 'Failed to create vehicle. Please check backend connection.';
+        this.errorMessage = err?.error?.message || err?.message || 'Failed to save vehicle. Please check backend connection.';
       }
     });
   }

@@ -29,4 +29,14 @@ export class DriverService {
       map(response => response.data)
     );
   }
+
+  updateDriver(id: string, driver: DriverRequest): Observable<DriverResponse> {
+    return this.http.put<ApiResponse<DriverResponse>>(`${this.apiUrl}/${id}`, driver).pipe(
+      map(response => response.data)
+    );
+  }
+
+  deleteDriver(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
+  }
 }

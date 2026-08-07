@@ -46,20 +46,20 @@ public class FleetController {
 
     @PutMapping("/vehicles/{vehicleId}")
     public ResponseEntity<ApiResponse<VehicleResponse>> updateVehicle(
-            @PathVariable UUID vehicleId,
+            @PathVariable("vehicleId") UUID vehicleId,
             @Valid @RequestBody VehicleRequest request) {
         ApiResponse<VehicleResponse> response = fleetService.updateVehicle(vehicleId, request);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @DeleteMapping("/vehicles/{vehicleId}")
-    public ResponseEntity<ApiResponse<Void>> deleteVehicle(@PathVariable UUID vehicleId) {
+    public ResponseEntity<ApiResponse<Void>> deleteVehicle(@PathVariable("vehicleId") UUID vehicleId) {
         ApiResponse<Void> response = fleetService.deleteVehicle(vehicleId);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @GetMapping("/companies/{companyId}/vehicles")
-    public ResponseEntity<ApiResponse<List<VehicleResponse>>> getVehiclesByCompany(@PathVariable UUID companyId) {
+    public ResponseEntity<ApiResponse<List<VehicleResponse>>> getVehiclesByCompany(@PathVariable("companyId") UUID companyId) {
         return ResponseEntity.ok(fleetService.getVehiclesByCompany(companyId));
     }
 
@@ -78,20 +78,20 @@ public class FleetController {
 
     @PutMapping("/drivers/{driverId}")
     public ResponseEntity<ApiResponse<DriverResponse>> updateDriver(
-            @PathVariable UUID driverId,
+            @PathVariable("driverId") UUID driverId,
             @Valid @RequestBody DriverRequest request) {
         ApiResponse<DriverResponse> response = fleetService.updateDriver(driverId, request);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @DeleteMapping("/drivers/{driverId}")
-    public ResponseEntity<ApiResponse<Void>> deleteDriver(@PathVariable UUID driverId) {
+    public ResponseEntity<ApiResponse<Void>> deleteDriver(@PathVariable("driverId") UUID driverId) {
         ApiResponse<Void> response = fleetService.deleteDriver(driverId);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
     @GetMapping("/companies/{companyId}/drivers")
-    public ResponseEntity<ApiResponse<List<DriverResponse>>> getDriversByCompany(@PathVariable UUID companyId) {
+    public ResponseEntity<ApiResponse<List<DriverResponse>>> getDriversByCompany(@PathVariable("companyId") UUID companyId) {
         return ResponseEntity.ok(fleetService.getDriversByCompany(companyId));
     }
 }
