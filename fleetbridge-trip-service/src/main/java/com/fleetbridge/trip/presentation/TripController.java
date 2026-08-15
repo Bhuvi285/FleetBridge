@@ -31,6 +31,20 @@ public class TripController {
         return ResponseEntity.ok(tripService.getAllRoutes());
     }
 
+    @PutMapping("/routes/{routeId}")
+    public ResponseEntity<ApiResponse<RouteResponse>> updateRoute(
+            @PathVariable("routeId") UUID routeId,
+            @Valid @RequestBody RouteRequest request) {
+        ApiResponse<RouteResponse> response = tripService.updateRoute(routeId, request);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+    }
+
+    @DeleteMapping("/routes/{routeId}")
+    public ResponseEntity<ApiResponse<Void>> deleteRoute(@PathVariable("routeId") UUID routeId) {
+        ApiResponse<Void> response = tripService.deleteRoute(routeId);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+    }
+
     // --- Trip Endpoints ---
 
     @PostMapping("/instances")
@@ -39,8 +53,27 @@ public class TripController {
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 
+    @GetMapping("/instances")
+    public ResponseEntity<ApiResponse<List<TripResponse>>> getAllTrips() {
+        return ResponseEntity.ok(tripService.getAllTrips());
+    }
+
     @GetMapping("/routes/{routeId}/instances")
-    public ResponseEntity<ApiResponse<List<TripResponse>>> getTripsByRoute(@PathVariable UUID routeId) {
+    public ResponseEntity<ApiResponse<List<TripResponse>>> getTripsByRoute(@PathVariable("routeId") UUID routeId) {
         return ResponseEntity.ok(tripService.getTripsByRoute(routeId));
+    }
+
+    @PutMapping("/instances/{tripId}")
+    public ResponseEntity<ApiResponse<TripResponse>> updateTrip(
+            @PathVariable("tripId") UUID tripId,
+            @Valid @RequestBody TripRequest request) {
+        ApiResponse<TripResponse> response = tripService.updateTrip(tripId, request);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+    }
+
+    @DeleteMapping("/instances/{tripId}")
+    public ResponseEntity<ApiResponse<Void>> deleteTrip(@PathVariable("tripId") UUID tripId) {
+        ApiResponse<Void> response = tripService.deleteTrip(tripId);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
 }

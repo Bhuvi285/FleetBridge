@@ -19,4 +19,6 @@ public class TripRequest {
 
     @NotNull(message = "Scheduled start time is required")
     private LocalDateTime scheduledStartTime;
+
+    private String status;
 }

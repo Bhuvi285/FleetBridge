@@ -36,9 +36,12 @@ export const routes: Routes = [
       {
         path: 'drivers',
         loadComponent: () => import('./fleet/drivers/drivers.component').then(m => m.DriversComponent)
+      },
+      {
+        path: 'trips',
+        loadComponent: () => import('./trips/trips.component').then(m => m.TripsComponent)
       }
       // Future lazy loaded modules:
-      // { path: 'fleet', loadChildren: () => import('./fleet/fleet.module').then(m => m.FleetModule) },
       // { path: 'tenants', loadChildren: () => import('./tenants/tenants.module').then(m => m.TenantsModule) },
     ]
   },
