@@ -3,6 +3,7 @@ CREATE DATABASE keycloak_db;
 CREATE DATABASE fleetbridge_org_db;
 CREATE DATABASE fleetbridge_fleet_db;
 CREATE DATABASE fleetbridge_trip_db;
+CREATE DATABASE fleetbridge_gps_db;
 
 -- Ensure password is set with scram-sha-256 for TCP/IP connections
 SET password_encryption = 'scram-sha-256';

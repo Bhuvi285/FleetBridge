@@ -19,6 +19,14 @@ spring:
           uri: http://localhost:8083
           predicates:
             - Path=/api/v1/trip/**
+        - id: gps-service-rest
+          uri: http://localhost:8084
+          predicates:
+            - Path=/api/v1/gps/**
+        - id: gps-service-websocket
+          uri: ws://localhost:8084
+          predicates:
+            - Path=/ws/telemetry/**
       
       globalcors:
         corsConfigurations:

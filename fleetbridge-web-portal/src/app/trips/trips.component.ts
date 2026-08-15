@@ -1,5 +1,6 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -8,9 +9,12 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { MatTabsModule } from '@angular/material/tabs';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatChipsModule } from '@angular/material/chips';
-import { forkJoin } from 'rxjs';
+import { MatSelectModule } from '@angular/material/select';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { forkJoin, Subscription } from 'rxjs';
 
 import { TripService } from '../core/services/trip.service';
+import { GpsService, GpsLocationResponse } from '../core/services/gps.service';
 import { TripResponse, RouteResponse } from '../core/models/trip.model';
 import { AddTripDialogComponent } from './components/add-trip-dialog/add-trip-dialog.component';
 import { AddRouteDialogComponent } from './components/add-route-dialog/add-route-dialog.component';
@@ -21,6 +25,7 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
   imports: [
     CommonModule,
     DatePipe,
+    FormsModule,
     MatTableModule,
     MatButtonModule,
     MatIconModule,
@@ -28,7 +33,9 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
     MatDialogModule,
     MatTabsModule,
     MatTooltipModule,
-    MatChipsModule
+    MatChipsModule,
+    MatSelectModule,
+    MatFormFieldModule
   ],
   template: `
     <!-- Page Header -->
@@ -269,6 +276,91 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
           </table>
         </mat-tab>
 
+        <!-- ─── Live Tracking Tab ─── -->
+        <mat-tab>
+          <ng-template mat-tab-label>
+            <mat-icon class="tab-icon" [class.pulse]="isTracking">my_location</mat-icon>
+            <span>Live Tracking</span>
+            @if (isTracking) { <span class="tab-badge live">LIVE</span> }
+          </ng-template>
+
+          <div class="tracking-panel">
+            <!-- Trip selector -->
+            <div class="tracking-controls">
+              <div class="control-group">
+                <label class="control-label">Select Trip to Track</label>
+                <select class="trip-select" [(ngModel)]="selectedTripId" (change)="onTripSelectChange()">
+                  <option value="">— Choose a trip —</option>
+                  @for (t of trips; track t.id) {
+                    <option [value]="t.id">
+                      {{ getRouteName(t.routeId) }} · {{ t.status }} · {{ t.scheduledStartTime | date:'MMM d, h:mm a' }}
+                    </option>
+                  }
+                </select>
+              </div>
+              <div class="tracking-actions">
+                @if (!isTracking) {
+                  <button class="btn-track" (click)="startTracking()" [disabled]="!selectedTripId">
+                    <mat-icon>play_arrow</mat-icon> Start Tracking
+                  </button>
+                } @else {
+                  <button class="btn-track stop" (click)="stopTracking()">
+                    <mat-icon>stop</mat-icon> Stop
+                  </button>
+                  <button class="btn-simulate" (click)="simulatePing()" title="Send a simulated GPS ping">
+                    <mat-icon>send</mat-icon> Simulate Ping
+                  </button>
+                }
+              </div>
+            </div>
+
+            <!-- Map container -->
+            <div class="map-wrapper">
+              <div id="gps-map" class="leaflet-map"></div>
+              @if (!isTracking) {
+                <div class="map-overlay">
+                  <div class="map-placeholder">
+                    <span class="map-icon">📡</span>
+                    <h3>No Active Tracking Session</h3>
+                    <p>Select a trip and click <strong>Start Tracking</strong> to see real-time location updates.</p>
+                  </div>
+                </div>
+              }
+            </div>
+
+            <!-- Live stats bar -->
+            @if (isTracking && lastPing) {
+              <div class="live-stats">
+                <div class="live-stat">
+                  <mat-icon>speed</mat-icon>
+                  <span class="live-stat-value">{{ lastPing.speedKmh?.toFixed(1) ?? '—' }} km/h</span>
+                  <span class="live-stat-label">Speed</span>
+                </div>
+                <div class="live-stat">
+                  <mat-icon>explore</mat-icon>
+                  <span class="live-stat-value">{{ lastPing.heading?.toFixed(0) ?? '—' }}°</span>
+                  <span class="live-stat-label">Heading</span>
+                </div>
+                <div class="live-stat">
+                  <mat-icon>location_on</mat-icon>
+                  <span class="live-stat-value">{{ lastPing.latitude.toFixed(5) }}, {{ lastPing.longitude.toFixed(5) }}</span>
+                  <span class="live-stat-label">Coordinates</span>
+                </div>
+                <div class="live-stat">
+                  <mat-icon>schedule</mat-icon>
+                  <span class="live-stat-value">{{ lastPing.recordedAt | date:'h:mm:ss a' }}</span>
+                  <span class="live-stat-label">Last Update</span>
+                </div>
+                <div class="live-stat">
+                  <mat-icon>pin_drop</mat-icon>
+                  <span class="live-stat-value">{{ pingCount }}</span>
+                  <span class="live-stat-label">Pings Received</span>
+                </div>
+              </div>
+            }
+          </div>
+        </mat-tab>
+
       </mat-tab-group>
     </div>
   `,
@@ -497,11 +589,82 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
     .text-right { text-align: right !important; }
 
     /* ── Action buttons ── */
-    .action-btn { transition: all 0.2s; }
-    .action-btn.edit { color: #6366f1 !important; }
-    .action-btn.edit:hover { background: rgba(99,102,241,0.15) !important; }
-    .action-btn.delete { color: #ef4444 !important; }
-    .action-btn.delete:hover { background: rgba(239,68,68,0.15) !important; }
+    /* ── Live Tracking Tab ── */
+    .tracking-panel { padding: 1.25rem; display: flex; flex-direction: column; gap: 1rem; }
+
+    .tracking-controls {
+      display: flex;
+      align-items: flex-end;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .control-group { display: flex; flex-direction: column; gap: 0.4rem; flex: 1; min-width: 260px; }
+    .control-label { font-size: 0.8rem; font-weight: 600; color: var(--text-secondary, #94a3b8); text-transform: uppercase; letter-spacing: 0.05em; }
+    .trip-select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      color: var(--text-primary, #f1f5f9);
+      padding: 0.6rem 0.9rem;
+      font-size: 0.9rem;
+      cursor: pointer;
+      outline: none;
+    }
+    .trip-select:focus { border-color: #6366f1; }
+    .trip-select option { background: #1e293b; }
+
+    .tracking-actions { display: flex; gap: 0.75rem; align-items: center; }
+    .btn-track {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: linear-gradient(135deg, #10b981, #059669);
+      color: white; border: none; border-radius: 10px;
+      padding: 0.6rem 1.25rem; font-size: 0.9rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-track:hover { transform: translateY(-1px); box-shadow: 0 4px 20px rgba(16,185,129,0.4); }
+    .btn-track:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+    .btn-track.stop { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    .btn-track.stop:hover { box-shadow: 0 4px 20px rgba(239,68,68,0.4); }
+    .btn-simulate {
+      display: flex; align-items: center; gap: 0.4rem;
+      background: rgba(99,102,241,0.15); color: #818cf8;
+      border: 1px solid rgba(99,102,241,0.3); border-radius: 10px;
+      padding: 0.6rem 1rem; font-size: 0.85rem; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-simulate:hover { background: rgba(99,102,241,0.25); }
+
+    /* Pulsing icon for live status */
+    .pulse { animation: pulse-anim 1.5s ease-in-out infinite; color: #10b981 !important; }
+    @keyframes pulse-anim { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .tab-badge.live { background: #10b981; color: white; animation: pulse-anim 1.5s ease-in-out infinite; }
+
+    /* Map */
+    .map-wrapper { position: relative; border-radius: 12px; overflow: hidden; height: 420px; border: 1px solid rgba(255,255,255,0.08); }
+    .leaflet-map { width: 100%; height: 100%; background: #0f172a; }
+    .map-overlay {
+      position: absolute; inset: 0;
+      background: rgba(15,23,42,0.85);
+      backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 12px;
+    }
+    .map-placeholder { text-align: center; }
+    .map-icon { font-size: 3rem; display: block; margin-bottom: 0.75rem; }
+    .map-placeholder h3 { color: var(--text-primary, #f1f5f9); margin: 0 0 0.5rem; }
+    .map-placeholder p { color: var(--text-secondary, #94a3b8); font-size: 0.9rem; margin: 0; }
+
+    /* Live stats bar */
+    .live-stats {
+      display: flex; gap: 1rem; flex-wrap: wrap;
+      background: rgba(16,185,129,0.08);
+      border: 1px solid rgba(16,185,129,0.2);
+      border-radius: 12px; padding: 1rem 1.25rem;
+    }
+    .live-stat { display: flex; flex-direction: column; align-items: center; gap: 0.2rem; flex: 1; min-width: 120px; }
+    .live-stat mat-icon { color: #34d399; font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
+    .live-stat-value { font-size: 1rem; font-weight: 700; color: var(--text-primary, #f1f5f9); }
+    .live-stat-label { font-size: 0.75rem; color: var(--text-secondary, #94a3b8); text-transform: uppercase; letter-spacing: 0.05em; }
 
     /* ── Empty State ── */
     .empty-state { text-align: center !important; padding: 4rem 2rem !important; }
@@ -511,18 +674,33 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
     .empty-content p { margin: 0; font-size: 0.9rem; color: var(--text-secondary, #94a3b8); }
   `]
 })
-export class TripsComponent implements OnInit {
+export class TripsComponent implements OnInit, OnDestroy {
   private tripService = inject(TripService);
-  private dialog = inject(MatDialog);
+  private gpsService  = inject(GpsService);
+  private dialog      = inject(MatDialog);
 
-  tripColumns = ['status', 'scheduledTime', 'route', 'vehicleId', 'driverId', 'actions'];
+  tripColumns  = ['status', 'scheduledTime', 'route', 'vehicleId', 'driverId', 'actions'];
   routeColumns = ['name', 'status', 'organizationId', 'tripCount', 'actions'];
 
-  trips: TripResponse[] = [];
+  trips: TripResponse[]   = [];
   routes: RouteResponse[] = [];
   filteredTrips: TripResponse[] = [];
-  isLoading = true;
+  isLoading       = true;
   activeTripFilter = 'ALL';
+
+  /* ── Live Tracking State ── */
+  selectedTripId = '';
+  isTracking     = false;
+  lastPing: GpsLocationResponse | null = null;
+  pingCount      = 0;
+  private gpsSub: Subscription | null = null;
+  private leafletMap: any = null;
+  private vehicleMarker: any = null;
+  private trailPolyline: any = null;
+  private trailCoords: [number, number][] = [];
+  // Simulated location (starts at Bengaluru city centre)
+  private simLat = 12.9716;
+  private simLng = 77.5946;
 
   tripFilters = [
     { label: 'All',       value: 'ALL'       },
@@ -539,6 +717,122 @@ export class TripsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadAll();
+    this.loadLeaflet();
+  }
+
+  ngOnDestroy(): void {
+    this.stopTracking();
+    if (this.leafletMap) { this.leafletMap.remove(); this.leafletMap = null; }
+  }
+
+  /* ── Load Leaflet from CDN ── */
+  private loadLeaflet(): void {
+    if ((window as any).L) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+    document.head.appendChild(link);
+    const script = document.createElement('script');
+    script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+    document.head.appendChild(script);
+  }
+
+  private initMap(): void {
+    const L = (window as any).L;
+    if (!L || this.leafletMap) return;
+    const el = document.getElementById('gps-map');
+    if (!el) return;
+
+    this.leafletMap = L.map('gps-map', { zoomControl: true }).setView([this.simLat, this.simLng], 14);
+    L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+      attribution: '© OpenStreetMap © CARTO',
+      maxZoom: 19
+    }).addTo(this.leafletMap);
+
+    const busIcon = L.divIcon({
+      className: '',
+      html: `<div style="font-size:2rem;filter:drop-shadow(0 2px 6px #10b981);">🚌</div>`,
+      iconSize: [36, 36], iconAnchor: [18, 36]
+    });
+    this.vehicleMarker = L.marker([this.simLat, this.simLng], { icon: busIcon }).addTo(this.leafletMap);
+    this.trailPolyline = L.polyline([], { color: '#10b981', weight: 3, opacity: 0.8 }).addTo(this.leafletMap);
+  }
+
+  private updateMarker(lat: number, lng: number): void {
+    if (!this.leafletMap) return;
+    this.vehicleMarker?.setLatLng([lat, lng]);
+    this.trailCoords.push([lat, lng]);
+    this.trailPolyline?.setLatLngs(this.trailCoords);
+    this.leafletMap.panTo([lat, lng], { animate: true, duration: 0.5 });
+  }
+
+  onTripSelectChange(): void {
+    if (this.isTracking) this.stopTracking();
+  }
+
+  startTracking(): void {
+    if (!this.selectedTripId) return;
+    this.isTracking    = true;
+    this.pingCount     = 0;
+    this.trailCoords   = [];
+    this.lastPing      = null;
+
+    // Init map after Angular renders the map div
+    setTimeout(() => this.initMap(), 200);
+
+    this.gpsSub = this.gpsService.subscribeToTrip(this.selectedTripId).subscribe({
+      next: (ping: GpsLocationResponse) => {
+        this.lastPing = ping;
+        this.pingCount++;
+        this.updateMarker(ping.latitude, ping.longitude);
+      },
+      error: (err: any) => console.error('WebSocket error', err)
+    });
+
+    // Also load historical trail
+    this.gpsService.getTripTrail(this.selectedTripId).subscribe({
+      next: (trail) => {
+        if (trail?.length) {
+          this.trailCoords = trail.map(p => [p.latitude, p.longitude] as [number, number]);
+          const last = trail[trail.length - 1];
+          this.lastPing = last;
+          setTimeout(() => {
+            this.trailPolyline?.setLatLngs(this.trailCoords);
+            this.vehicleMarker?.setLatLng([last.latitude, last.longitude]);
+            this.leafletMap?.panTo([last.latitude, last.longitude]);
+          }, 300);
+        }
+      },
+      error: () => {} // OK if no history yet
+    });
+  }
+
+  stopTracking(): void {
+    this.isTracking = false;
+    this.gpsSub?.unsubscribe();
+    this.gpsSub = null;
+    this.gpsService.disconnect();
+  }
+
+  simulatePing(): void {
+    if (!this.selectedTripId) return;
+    // Walk in a small random direction
+    this.simLat += (Math.random() - 0.5) * 0.001;
+    this.simLng += (Math.random() - 0.4) * 0.001;
+
+    const trip = this.trips.find(t => t.id === this.selectedTripId);
+    this.gpsService.ingestLocation({
+      tripId: this.selectedTripId,
+      vehicleId: trip?.vehicleId ?? '00000000-0000-0000-0000-000000000001',
+      latitude: this.simLat,
+      longitude: this.simLng,
+      speedKmh: 30 + Math.random() * 20,
+      heading: Math.random() * 360,
+      accuracy: 5.0
+    }).subscribe({
+      next: () => {},
+      error: (err: any) => console.warn('Simulate ping error (is GPS service running?)', err)
+    });
   }
 
   loadAll(): void {

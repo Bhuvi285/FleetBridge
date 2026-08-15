@@ -1,0 +1,37 @@
+server:
+  port: 8084
+
+spring:
+  application:
+    name: fleetbridge-gps-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/fleetbridge_gps_db
+    username: fleetbridge_user
+    password: fleetbridge_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+  jackson:
+    deserialization:
+      fail-on-unknown-properties: false
+    serialization:
+      write-dates-as-timestamps: false
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8080/realms/fleetbridge-master
+          jwk-set-uri: http://localhost:8080/realms/fleetbridge-master/protocol/openid-connect/certs
+
+logging:
+  level:
+    com.fleetbridge.gps: DEBUG
+    org.springframework.web.socket: DEBUG

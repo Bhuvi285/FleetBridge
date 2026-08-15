@@ -1,0 +1,9 @@
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\application\service\GpsService.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\GpsServiceApplication.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\presentation\controller\GpsController.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\domain\entity\GpsLocation.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\infrastructure\config\SecurityConfig.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\infrastructure\config\WebSocketConfig.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\infrastructure\repository\GpsLocationRepository.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\application\dto\GpsLocationRequest.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-gps-service\src\main\java\com\fleetbridge\gps\application\dto\GpsLocationResponse.java

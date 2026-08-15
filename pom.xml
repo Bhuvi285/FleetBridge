@@ -19,6 +19,7 @@
         <module>fleetbridge-fleet-service</module>
         <module>fleetbridge-trip-service</module>
         <module>fleetbridge-notification-service</module>
+        <module>fleetbridge-gps-service</module>
     </modules>
 
     <properties>
