@@ -61,15 +61,20 @@ public class TripService {
     // --- Trip Operations ---
 
     public ApiResponse<TripResponse> scheduleTrip(TripRequest request) {
-        if (!routeRepository.existsById(request.getRouteId())) {
+        Route route = routeRepository.findById(request.getRouteId())
+                .orElse(null);
+        if (route == null) {
             return ApiResponse.error("Route not found");
         }
 
-        // Ideally, we verify vehicle/driver existence here via fleetServiceClient.
-        // For MVP, we assume the IDs provided by the client are valid or we could add robust error handling.
-        
-        TripInstance trip = tripMapper.toEntity(request);
-        trip.setStatus("SCHEDULED");
+        TripInstance trip = TripInstance.builder()
+                .route(route)
+                .vehicleId(request.getVehicleId())
+                .driverId(request.getDriverId())
+                .scheduledStartTime(request.getScheduledStartTime())
+                .status("SCHEDULED")
+                .build();
+
         trip = tripInstanceRepository.save(trip);
         return ApiResponse.success(tripMapper.toResponse(trip), "Trip scheduled successfully");
     }
@@ -82,7 +87,7 @@ public class TripService {
     }
 
     public ApiResponse<List<TripResponse>> getTripsByRoute(UUID routeId) {
-        List<TripResponse> trips = tripInstanceRepository.findByRouteId(routeId).stream()
+        List<TripResponse> trips = tripInstanceRepository.findByRoute_Id(routeId).stream()
                 .map(tripMapper::toResponse)
                 .collect(Collectors.toList());
         return ApiResponse.success(trips, "Trips retrieved successfully");

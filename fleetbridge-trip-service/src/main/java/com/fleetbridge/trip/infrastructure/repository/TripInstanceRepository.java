@@ -9,5 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface TripInstanceRepository extends JpaRepository<TripInstance, UUID> {
-    List<TripInstance> findByRouteId(UUID routeId);
+    List<TripInstance> findByRoute_Id(UUID routeId);
 }

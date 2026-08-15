@@ -8,8 +8,6 @@ export interface RouteResponse {
   organizationId: string;
   name: string;
   status: string;
-  createdAt: string;
-  updatedAt: string;
 }
 
 export interface TripRequest {
@@ -29,6 +27,4 @@ export interface TripResponse {
   scheduledStartTime: string;
   actualStartTime?: string;
   actualEndTime?: string;
-  createdAt: string;
-  updatedAt: string;
 }
