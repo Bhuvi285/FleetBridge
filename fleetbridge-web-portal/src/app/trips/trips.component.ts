@@ -1,4 +1,5 @@
 import { Component, OnInit, OnDestroy, inject, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { CommonModule, DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatTableModule } from '@angular/material/table';
@@ -15,6 +16,7 @@ import { forkJoin, Subscription } from 'rxjs';
 
 import { TripService } from '../core/services/trip.service';
 import { GpsService, GpsLocationResponse } from '../core/services/gps.service';
+import { ToastService } from '../core/services/toast.service';
 import { TripResponse, RouteResponse } from '../core/models/trip.model';
 import { AddTripDialogComponent } from './components/add-trip-dialog/add-trip-dialog.component';
 import { AddRouteDialogComponent } from './components/add-route-dialog/add-route-dialog.component';
@@ -96,7 +98,7 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
         </div>
       }
 
-      <mat-tab-group (selectedTabChange)="onTabChange($event.index)" animationDuration="200ms" class="trips-tabs">
+      <mat-tab-group [(selectedIndex)]="selectedTabIndex" (selectedTabChange)="onTabChange($event.index)" animationDuration="200ms" class="trips-tabs">
 
         <!-- ─── Trips Tab ─── -->
         <mat-tab>
@@ -678,6 +680,10 @@ export class TripsComponent implements OnInit, OnDestroy {
   private tripService = inject(TripService);
   private gpsService  = inject(GpsService);
   private dialog      = inject(MatDialog);
+  private route       = inject(ActivatedRoute);
+  private toast       = inject(ToastService);
+
+  selectedTabIndex = 0;
 
   tripColumns  = ['status', 'scheduledTime', 'route', 'vehicleId', 'driverId', 'actions'];
   routeColumns = ['name', 'status', 'organizationId', 'tripCount', 'actions'];
@@ -718,6 +724,12 @@ export class TripsComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.loadAll();
     this.loadLeaflet();
+    this.route.url.subscribe(segments => {
+      if (segments.length > 0 && segments[0].path === 'tracking') {
+        this.selectedTabIndex = 2;
+        setTimeout(() => this.initMap(), 300);
+      }
+    });
   }
 
   ngOnDestroy(): void {
@@ -854,8 +866,11 @@ export class TripsComponent implements OnInit, OnDestroy {
     });
   }
 
-  onTabChange(_index: number): void {
-    // Keep state in sync if needed
+  onTabChange(index: number): void {
+    this.selectedTabIndex = index;
+    if (index === 2) {
+      setTimeout(() => this.initMap(), 200);
+    }
   }
 
   /* ── Filters ── */
@@ -905,8 +920,8 @@ export class TripsComponent implements OnInit, OnDestroy {
   deleteTrip(id: string): void {
     if (!confirm('Delete this trip permanently?')) return;
     this.tripService.deleteTrip(id).subscribe({
-      next: () => this.loadAll(),
-      error: (err: any) => console.error('Delete trip failed', err)
+      next: () => { this.toast.success('Trip deleted.'); this.loadAll(); },
+      error: () => this.toast.error('Failed to delete trip.')
     });
   }
 
@@ -936,8 +951,8 @@ export class TripsComponent implements OnInit, OnDestroy {
       : 'Delete this route permanently?';
     if (!confirm(msg)) return;
     this.tripService.deleteRoute(id).subscribe({
-      next: () => this.loadAll(),
-      error: (err: any) => console.error('Delete route failed', err)
+      next: () => { this.toast.success('Route deleted.'); this.loadAll(); },
+      error: () => this.toast.error('Failed to delete route.')
     });
   }
 }

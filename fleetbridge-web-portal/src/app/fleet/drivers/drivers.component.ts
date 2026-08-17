@@ -8,6 +8,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { DriverService } from '../../core/services/driver.service';
 import { DriverResponse } from '../../core/models/driver.model';
 import { AddDriverDialogComponent } from './components/add-driver-dialog/add-driver-dialog.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-drivers',
@@ -198,6 +199,7 @@ import { AddDriverDialogComponent } from './components/add-driver-dialog/add-dri
 export class DriversComponent implements OnInit {
   private driverService = inject(DriverService);
   private dialog = inject(MatDialog);
+  private toast  = inject(ToastService);
 
   drivers: DriverResponse[] = [];
   displayedColumns: string[] = ['status', 'name', 'licenseNumber', 'phoneNumber', 'actions'];
@@ -253,8 +255,8 @@ export class DriversComponent implements OnInit {
   deleteDriver(id: string): void {
     if (confirm('Are you sure you want to remove this driver?')) {
       this.driverService.deleteDriver(id).subscribe({
-        next: () => this.loadDrivers(),
-        error: (err) => console.error('Error deleting driver', err)
+        next: () => { this.toast.success('Driver removed successfully.'); this.loadDrivers(); },
+        error: () => this.toast.error('Failed to remove driver.')
       });
     }
   }

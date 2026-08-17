@@ -1,6 +1,7 @@
-import { Component, signal } from '@angular/core';
+import { Component, signal, computed, inject } from '@angular/core';
 import { RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { CommonModule } from '@angular/common';
+import { ToastContainerComponent } from '../../shared/toast-container/toast-container.component';
 import { AuthService } from '../../core/services/auth.service';
 
 interface NavItem {
@@ -12,8 +13,9 @@ interface NavItem {
 @Component({
   selector: 'app-main-layout',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive],
+  imports: [CommonModule, RouterOutlet, RouterLink, RouterLinkActive, ToastContainerComponent],
   template: `
+    <app-toast-container />
     <div class="main-layout" [class.sidebar-collapsed]="sidebarCollapsed()">
       <!-- Sidebar -->
       <aside class="sidebar">
@@ -28,7 +30,7 @@ interface NavItem {
         </div>
 
         <nav class="sidebar-nav">
-          @for (item of navItems; track item.route) {
+          @for (item of navItems(); track item.route) {
             <a class="nav-item"
                [routerLink]="item.route"
                routerLinkActive="active">
@@ -264,19 +266,27 @@ interface NavItem {
 })
 export class MainLayoutComponent {
   sidebarCollapsed = signal(false);
+  public authService = inject(AuthService);
 
-  navItems: NavItem[] = [
-    { label: 'Dashboard',  icon: '📊', route: '/dashboard' },
-    { label: 'Fleet',      icon: '🚛', route: '/fleet' },
-    { label: 'Drivers',    icon: '👨‍✈️', route: '/drivers' },
-    { label: 'Vehicles',   icon: '🚌', route: '/vehicles' },
-    { label: 'Trips',      icon: '🗺️', route: '/trips' },
-    { label: 'Tracking',   icon: '📍', route: '/tracking' },
-    { label: 'Tenants',    icon: '🏢', route: '/tenants' },
-    { label: 'Admin',      icon: '⚙️', route: '/admin' },
+  // Navigation items per role
+  private allNavItems: (NavItem & { roles?: string[] })[] = [
+    { label: 'Dashboard',     icon: '📊', route: '/dashboard' },
+    { label: 'Organizations', icon: '🏢', route: '/organizations', roles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
+    { label: 'Employees',     icon: '👥', route: '/employees',     roles: ['SUPER_ADMIN', 'ORG_ADMIN'] },
+    { label: 'Vehicles',      icon: '🚌', route: '/vehicles',      roles: ['SUPER_ADMIN', 'TRAVEL_ADMIN'] },
+    { label: 'Drivers',       icon: '👨‍✈️', route: '/drivers',       roles: ['SUPER_ADMIN', 'TRAVEL_ADMIN'] },
+    { label: 'Trips',         icon: '🗺️', route: '/trips',         roles: ['SUPER_ADMIN', 'TRAVEL_ADMIN', 'ORG_ADMIN'] },
+    { label: 'Live Tracking', icon: '📍', route: '/tracking',      roles: ['SUPER_ADMIN', 'TRAVEL_ADMIN', 'ORG_ADMIN'] },
   ];
 
-  constructor(public authService: AuthService) {}
+  readonly navItems = computed(() => {
+    const roles = this.authService.userRoles();
+    // If no roles resolved yet (e.g. demo mode), show all items
+    if (!roles || roles.length === 0) return this.allNavItems;
+    return this.allNavItems.filter(item =>
+      !item.roles || item.roles.some(r => roles.includes(r))
+    );
+  });
 
   toggleSidebar(): void {
     this.sidebarCollapsed.update(v => !v);

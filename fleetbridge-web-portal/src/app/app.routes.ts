@@ -29,6 +29,12 @@ export const routes: Routes = [
         path: 'dashboard',
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
+      // ── Fleet ──
+      {
+        path: 'fleet',
+        redirectTo: '/vehicles',
+        pathMatch: 'full'
+      },
       {
         path: 'vehicles',
         loadComponent: () => import('./fleet/vehicles/vehicles.component').then(m => m.VehiclesComponent)
@@ -37,12 +43,25 @@ export const routes: Routes = [
         path: 'drivers',
         loadComponent: () => import('./fleet/drivers/drivers.component').then(m => m.DriversComponent)
       },
+      // ── Trips ──
       {
         path: 'trips',
         loadComponent: () => import('./trips/trips.component').then(m => m.TripsComponent)
+      },
+      {
+        path: 'tracking',
+        loadComponent: () => import('./trips/trips.component').then(m => m.TripsComponent)
+      },
+      // ── Organizations ──
+      {
+        path: 'organizations',
+        loadComponent: () => import('./organizations/organizations.component').then(m => m.OrganizationsComponent)
+      },
+      // ── Employees ──
+      {
+        path: 'employees',
+        loadComponent: () => import('./employees/employees.component').then(m => m.EmployeesComponent)
       }
-      // Future lazy loaded modules:
-      // { path: 'tenants', loadChildren: () => import('./tenants/tenants.module').then(m => m.TenantsModule) },
     ]
   },
   {

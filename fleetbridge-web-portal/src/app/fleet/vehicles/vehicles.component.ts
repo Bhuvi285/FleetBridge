@@ -8,6 +8,7 @@ import { MatDialogModule, MatDialog } from '@angular/material/dialog';
 import { VehicleService } from '../../core/services/vehicle.service';
 import { VehicleResponse } from '../../core/models/vehicle.model';
 import { AddVehicleDialogComponent } from './components/add-vehicle-dialog/add-vehicle-dialog.component';
+import { ToastService } from '../../core/services/toast.service';
 
 @Component({
   selector: 'app-vehicles',
@@ -249,6 +250,7 @@ import { AddVehicleDialogComponent } from './components/add-vehicle-dialog/add-v
 export class VehiclesComponent implements OnInit {
   private vehicleService = inject(VehicleService);
   private dialog = inject(MatDialog);
+  private toast  = inject(ToastService);
   
   displayedColumns: string[] = ['status', 'licensePlate', 'makeModel', 'type', 'actions'];
   vehicles: VehicleResponse[] = [];
@@ -305,8 +307,8 @@ export class VehiclesComponent implements OnInit {
   deleteVehicle(id: string): void {
     if (confirm('Are you sure you want to delete this vehicle?')) {
       this.vehicleService.deleteVehicle(id).subscribe({
-        next: () => this.loadVehicles(),
-        error: (err) => console.error('Error deleting vehicle', err)
+        next: () => { this.toast.success('Vehicle deleted successfully.'); this.loadVehicles(); },
+        error: () => this.toast.error('Failed to delete vehicle.')
       });
     }
   }
