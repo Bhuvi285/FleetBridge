@@ -68,16 +68,26 @@ export class AuthService {
     const claims = this.oauthService.getIdentityClaims() as any;
     if (!claims) return;
     
-    // Extract roles from Keycloak JWT payload format
+    // Extract roles from Keycloak JWT payload format (from Access Token)
     let roles: string[] = [];
-    if (claims.realm_access && claims.realm_access.roles) {
+    const accessToken = this.oauthService.getAccessToken();
+    if (accessToken) {
+      try {
+        const payload = JSON.parse(atob(accessToken.split('.')[1]));
+        if (payload.realm_access && payload.realm_access.roles) {
+          roles = payload.realm_access.roles;
+        }
+      } catch (e) {
+        console.error('Failed to parse access token', e);
+      }
+    } else if (claims.realm_access && claims.realm_access.roles) {
       roles = claims.realm_access.roles;
     }
 
     const user: AuthUser = {
       id: claims.sub,
       email: claims.email,
-      name: claims.preferred_username || claims.name,
+      name: claims.preferred_username || claims.name || claims.email || 'User',
       roles: roles,
       tenantId: 'default-tenant' // Ideally parsed from custom claim
     };

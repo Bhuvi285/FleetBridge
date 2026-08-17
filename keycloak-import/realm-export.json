@@ -3,11 +3,11 @@
   "enabled": true,
   "users": [
     {
-      "username": "admin@fleetbridge.io",
+      "username": "superadmin@fleetbridge.io",
       "enabled": true,
-      "email": "admin@fleetbridge.io",
-      "firstName": "Admin",
-      "lastName": "User",
+      "email": "superadmin@fleetbridge.io",
+      "firstName": "Super",
+      "lastName": "Admin",
       "credentials": [
         {
           "type": "password",
@@ -15,9 +15,37 @@
           "temporary": false
         }
       ],
-      "realmRoles": [
-        "SUPER_ADMIN"
-      ]
+      "realmRoles": ["SUPER_ADMIN"]
+    },
+    {
+      "username": "traveladmin@fleetbridge.io",
+      "enabled": true,
+      "email": "traveladmin@fleetbridge.io",
+      "firstName": "Travel",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["TRAVEL_ADMIN"]
+    },
+    {
+      "username": "orgadmin@fleetbridge.io",
+      "enabled": true,
+      "email": "orgadmin@fleetbridge.io",
+      "firstName": "Org",
+      "lastName": "Admin",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "admin123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["ORG_ADMIN"]
     }
   ],
   "roles": {
@@ -27,8 +55,12 @@
         "description": "Super Administrator"
       },
       {
-        "name": "FLEET_MANAGER",
-        "description": "Fleet Manager"
+        "name": "TRAVEL_ADMIN",
+        "description": "Travel Company Administrator"
+      },
+      {
+        "name": "ORG_ADMIN",
+        "description": "Corporate Organization Administrator"
       }
     ]
   },
