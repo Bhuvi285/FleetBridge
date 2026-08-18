@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-08-15T22:32:54+0530",
-    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260528-0407, environment: Java 21.0.11 (Eclipse Adoptium)"
+    date = "2026-08-17T17:01:15+0530",
+    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
 )
 @Component
 public class OrganizationMapperImpl implements OrganizationMapper {
@@ -22,9 +22,9 @@ public class OrganizationMapperImpl implements OrganizationMapper {
 
         Organization.OrganizationBuilder organization = Organization.builder();
 
-        organization.industry( request.getIndustry() );
-        organization.name( request.getName() );
         organization.tenantId( request.getTenantId() );
+        organization.name( request.getName() );
+        organization.industry( request.getIndustry() );
 
         return organization.build();
     }
@@ -38,9 +38,9 @@ public class OrganizationMapperImpl implements OrganizationMapper {
         OrganizationResponse.OrganizationResponseBuilder organizationResponse = OrganizationResponse.builder();
 
         organizationResponse.id( organization.getId() );
-        organizationResponse.industry( organization.getIndustry() );
-        organizationResponse.name( organization.getName() );
         organizationResponse.tenantId( organization.getTenantId() );
+        organizationResponse.name( organization.getName() );
+        organizationResponse.industry( organization.getIndustry() );
 
         return organizationResponse.build();
     }

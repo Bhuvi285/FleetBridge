@@ -35,4 +35,15 @@ public class EmployeeController {
     public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getEmployeesByOrganization(@PathVariable UUID organizationId) {
         return ResponseEntity.ok(employeeService.getEmployeesByOrganization(organizationId));
     }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<EmployeeResponse>>> getAllEmployees() {
+        return ResponseEntity.ok(employeeService.getAllEmployees());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteEmployee(@PathVariable UUID id) {
+        ApiResponse<Void> response = employeeService.deleteEmployee(id);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.notFound().build();
+    }
 }

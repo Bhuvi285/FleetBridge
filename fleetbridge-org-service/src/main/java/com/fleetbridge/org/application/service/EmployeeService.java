@@ -47,4 +47,19 @@ public class EmployeeService {
                 .collect(Collectors.toList());
         return ApiResponse.success(employees, "Employees retrieved successfully");
     }
+
+    public ApiResponse<List<EmployeeResponse>> getAllEmployees() {
+        List<EmployeeResponse> employees = employeeRepository.findAll().stream()
+                .map(employeeMapper::toResponse)
+                .collect(Collectors.toList());
+        return ApiResponse.success(employees, "All employees retrieved successfully");
+    }
+
+    public ApiResponse<Void> deleteEmployee(UUID id) {
+        if (!employeeRepository.existsById(id)) {
+            return ApiResponse.error("Employee not found");
+        }
+        employeeRepository.deleteById(id);
+        return ApiResponse.success(null, "Employee deleted successfully");
+    }
 }

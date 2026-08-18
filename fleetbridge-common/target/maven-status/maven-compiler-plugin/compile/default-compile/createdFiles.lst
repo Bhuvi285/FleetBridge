@@ -1,5 +1,7 @@
+com\fleetbridge\common\exception\ErrorResponse.class
+com\fleetbridge\common\exception\ErrorResponse$ErrorResponseBuilder.class
+com\fleetbridge\common\events\TripStatusChangedEvent$TripStatusChangedEventBuilder.class
 com\fleetbridge\common\dto\ApiResponse$ApiResponseBuilder.class
 com\fleetbridge\common\dto\ApiResponse.class
-com\fleetbridge\common\exception\ErrorResponse.class
 com\fleetbridge\common\exception\GlobalExceptionHandler.class
-com\fleetbridge\common\exception\ErrorResponse$ErrorResponseBuilder.class
+com\fleetbridge\common\events\TripStatusChangedEvent.class

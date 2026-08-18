@@ -76,6 +76,13 @@ export const routes: Routes = [
       }
     ]
   },
+  // ── Driver PWA Portal (standalone, no admin sidebar) ──
+  {
+    path: 'driver',
+    canActivate: [roleGuard],
+    data: { roles: ['DRIVER', 'SUPER_ADMIN'] },
+    loadComponent: () => import('./driver/driver-dashboard/driver-dashboard.component').then(m => m.DriverDashboardComponent)
+  },
   {
     path: '**',
     redirectTo: '/dashboard'

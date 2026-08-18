@@ -69,4 +69,11 @@ export class TripService {
   deleteTrip(id: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/instances/${id}`);
   }
+
+  /** Convenience method used by Driver PWA to change only the status */
+  updateTripStatus(id: string, status: string): Observable<TripResponse> {
+    return this.http.patch<ApiResponse<TripResponse>>(`${this.apiUrl}/instances/${id}/status`, { status }).pipe(
+      map(response => response.data)
+    );
+  }
 }

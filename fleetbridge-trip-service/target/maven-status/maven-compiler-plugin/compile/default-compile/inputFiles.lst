@@ -3,6 +3,7 @@ D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-tri
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\client\FleetServiceClient.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\domain\entity\Route.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\repository\RouteRepository.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\outbox\OutboxEventRepository.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\domain\entity\TripInstance.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\application\dto\TripRequest.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\repository\TripInstanceRepository.java
@@ -10,5 +11,7 @@ D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-tri
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\application\mapper\TripMapper.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\presentation\TripController.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\application\dto\TripResponse.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\outbox\OutboxEvent.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\TripServiceApplication.java
+D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\infrastructure\kafka\OutboxRelayScheduler.java
 D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-trip-service\src\main\java\com\fleetbridge\trip\application\dto\RouteRequest.java

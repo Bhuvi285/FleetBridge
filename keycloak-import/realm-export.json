@@ -46,6 +46,21 @@
         }
       ],
       "realmRoles": ["ORG_ADMIN"]
+    },
+    {
+      "username": "driver@fleetbridge.io",
+      "enabled": true,
+      "email": "driver@fleetbridge.io",
+      "firstName": "John",
+      "lastName": "Driver",
+      "credentials": [
+        {
+          "type": "password",
+          "value": "driver123",
+          "temporary": false
+        }
+      ],
+      "realmRoles": ["DRIVER"]
     }
   ],
   "roles": {
@@ -61,6 +76,10 @@
       {
         "name": "ORG_ADMIN",
         "description": "Corporate Organization Administrator"
+      },
+      {
+        "name": "DRIVER",
+        "description": "Fleet Driver - Mobile PWA User"
       }
     ]
   },

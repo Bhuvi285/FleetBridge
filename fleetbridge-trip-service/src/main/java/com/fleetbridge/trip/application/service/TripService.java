@@ -8,8 +8,13 @@ import com.fleetbridge.trip.domain.entity.TripInstance;
 import com.fleetbridge.trip.infrastructure.client.FleetServiceClient;
 import com.fleetbridge.trip.infrastructure.repository.RouteRepository;
 import com.fleetbridge.trip.infrastructure.repository.TripInstanceRepository;
+import com.fleetbridge.common.events.TripStatusChangedEvent;
+import com.fleetbridge.trip.infrastructure.outbox.OutboxEvent;
+import com.fleetbridge.trip.infrastructure.outbox.OutboxEventRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -23,6 +28,8 @@ public class TripService {
     private final TripInstanceRepository tripInstanceRepository;
     private final FleetServiceClient fleetServiceClient;
     private final TripMapper tripMapper;
+    private final OutboxEventRepository outboxEventRepository;
+    private final ObjectMapper objectMapper;
 
     // --- Route Operations ---
 
@@ -60,6 +67,7 @@ public class TripService {
 
     // --- Trip Operations ---
 
+    @Transactional
     public ApiResponse<TripResponse> scheduleTrip(TripRequest request) {
         Route route = routeRepository.findById(request.getRouteId())
                 .orElse(null);
@@ -76,6 +84,7 @@ public class TripService {
                 .build();
 
         trip = tripInstanceRepository.save(trip);
+        saveOutboxEvent(trip, null, "SCHEDULED");
         return ApiResponse.success(tripMapper.toResponse(trip), "Trip scheduled successfully");
     }
 
@@ -93,15 +102,23 @@ public class TripService {
         return ApiResponse.success(trips, "Trips retrieved successfully");
     }
 
+    @Transactional
     public ApiResponse<TripResponse> updateTrip(UUID tripId, TripRequest request) {
         return tripInstanceRepository.findById(tripId)
                 .map(trip -> {
+                    String oldStatus = trip.getStatus();
+                    String newStatus = request.getStatus() != null ? request.getStatus() : oldStatus;
                     // Note: Would validate vehicle/driver again if they changed.
                     trip.setVehicleId(request.getVehicleId());
                     trip.setDriverId(request.getDriverId());
                     trip.setScheduledStartTime(request.getScheduledStartTime());
-                    trip.setStatus(request.getStatus() != null ? request.getStatus() : trip.getStatus());
+                    trip.setStatus(newStatus);
                     trip = tripInstanceRepository.save(trip);
+                    
+                    if (!oldStatus.equals(newStatus)) {
+                        saveOutboxEvent(trip, oldStatus, newStatus);
+                    }
+                    
                     return ApiResponse.success(tripMapper.toResponse(trip), "Trip updated successfully");
                 })
                 .orElse(ApiResponse.error("Trip not found"));
@@ -113,5 +130,45 @@ public class TripService {
         }
         tripInstanceRepository.deleteById(tripId);
         return ApiResponse.success(null, "Trip deleted successfully");
+    }
+
+    @Transactional
+    public ApiResponse<TripResponse> updateTripStatus(UUID tripId, String newStatus) {
+        return tripInstanceRepository.findById(tripId)
+                .map(trip -> {
+                    String oldStatus = trip.getStatus();
+                    trip.setStatus(newStatus);
+                    trip = tripInstanceRepository.save(trip);
+                    if (!oldStatus.equals(newStatus)) {
+                        saveOutboxEvent(trip, oldStatus, newStatus);
+                    }
+                    return ApiResponse.success(tripMapper.toResponse(trip), "Trip status updated to " + newStatus);
+                })
+                .orElse(ApiResponse.error("Trip not found"));
+    }
+
+    private void saveOutboxEvent(TripInstance trip, String oldStatus, String newStatus) {
+        try {
+            TripStatusChangedEvent event = TripStatusChangedEvent.builder()
+                    .tripId(trip.getId().toString())
+                    .routeId(trip.getRoute().getId().toString())
+                    .vehicleId(trip.getVehicleId().toString())
+                    .driverId(trip.getDriverId().toString())
+                    .oldStatus(oldStatus)
+                    .newStatus(newStatus)
+                    .timestamp(java.time.LocalDateTime.now())
+                    .build();
+
+            OutboxEvent outboxEvent = OutboxEvent.builder()
+                    .aggregateType("Trip")
+                    .aggregateId(trip.getId().toString())
+                    .eventType("TripStatusChangedEvent")
+                    .payload(objectMapper.writeValueAsString(event))
+                    .build();
+
+            outboxEventRepository.save(outboxEvent);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to save outbox event", e);
+        }
     }
 }

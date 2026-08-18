@@ -11,3 +11,12 @@ spring:
         jwt:
           issuer-uri: http://localhost:8080/realms/fleetbridge-master
           jwk-set-uri: http://localhost:8080/realms/fleetbridge-master/protocol/openid-connect/certs
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: fleetbridge-notification-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "com.fleetbridge.common.events"

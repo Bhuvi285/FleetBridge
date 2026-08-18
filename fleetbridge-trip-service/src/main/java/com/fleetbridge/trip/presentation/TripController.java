@@ -76,4 +76,17 @@ public class TripController {
         ApiResponse<Void> response = tripService.deleteTrip(tripId);
         return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
     }
+
+    /** Driver PWA endpoint — change only the status of a trip */
+    @PatchMapping("/instances/{tripId}/status")
+    public ResponseEntity<ApiResponse<TripResponse>> updateTripStatus(
+            @PathVariable("tripId") UUID tripId,
+            @RequestBody java.util.Map<String, String> body) {
+        String newStatus = body.get("status");
+        if (newStatus == null || newStatus.isBlank()) {
+            return ResponseEntity.badRequest().body(ApiResponse.error("status field is required"));
+        }
+        ApiResponse<TripResponse> response = tripService.updateTripStatus(tripId, newStatus);
+        return response.isSuccess() ? ResponseEntity.ok(response) : ResponseEntity.badRequest().body(response);
+    }
 }
