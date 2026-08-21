@@ -1,7 +1,7 @@
 import { Routes } from '@angular/router';
 import { AuthLayoutComponent } from './layout/auth-layout/auth-layout.component';
 import { MainLayoutComponent } from './layout/main-layout/main-layout.component';
-import { authGuard, guestGuard, roleGuard } from './core/guards/auth.guard';
+import { authGuard, guestGuard, roleGuard, driverRedirectGuard } from './core/guards/auth.guard';
 
 export const routes: Routes = [
   {
@@ -27,6 +27,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'dashboard',
+        canActivate: [driverRedirectGuard],
         loadComponent: () => import('./dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       // ── Fleet ──

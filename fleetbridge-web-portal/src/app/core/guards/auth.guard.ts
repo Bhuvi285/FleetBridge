@@ -26,8 +26,25 @@ export const guestGuard: CanActivateFn = async () => {
     return true;
   }
 
-  router.navigate(['/dashboard']);
+  if (authService.userRoles().includes('DRIVER')) {
+    router.navigate(['/driver']);
+  } else {
+    router.navigate(['/dashboard']);
+  }
   return false;
+};
+
+export const driverRedirectGuard: CanActivateFn = async () => {
+  const authService = inject(AuthService);
+  const router = inject(Router);
+
+  await authService.initialAuthResolver;
+
+  if (authService.isAuthenticated() && authService.userRoles().includes('DRIVER')) {
+    router.navigate(['/driver']);
+    return false;
+  }
+  return true;
 };
 
 export const roleGuard: CanActivateFn = async (route) => {
