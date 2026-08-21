@@ -10,8 +10,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-08-17T17:01:14+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
+    date = "2026-08-21T13:14:53+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
 public class EmployeeMapperImpl implements EmployeeMapper {
@@ -25,11 +25,11 @@ public class EmployeeMapperImpl implements EmployeeMapper {
         Employee.EmployeeBuilder employee = Employee.builder();
 
         employee.organization( employeeRequestToOrganization( request ) );
+        employee.department( request.getDepartment() );
+        employee.email( request.getEmail() );
         employee.firstName( request.getFirstName() );
         employee.lastName( request.getLastName() );
-        employee.email( request.getEmail() );
         employee.phoneNumber( request.getPhoneNumber() );
-        employee.department( request.getDepartment() );
 
         return employee.build();
     }
@@ -43,12 +43,12 @@ public class EmployeeMapperImpl implements EmployeeMapper {
         EmployeeResponse.EmployeeResponseBuilder employeeResponse = EmployeeResponse.builder();
 
         employeeResponse.organizationId( employeeOrganizationId( employee ) );
-        employeeResponse.id( employee.getId() );
-        employeeResponse.firstName( employee.getFirstName() );
-        employeeResponse.lastName( employee.getLastName() );
-        employeeResponse.email( employee.getEmail() );
-        employeeResponse.phoneNumber( employee.getPhoneNumber() );
         employeeResponse.department( employee.getDepartment() );
+        employeeResponse.email( employee.getEmail() );
+        employeeResponse.firstName( employee.getFirstName() );
+        employeeResponse.id( employee.getId() );
+        employeeResponse.lastName( employee.getLastName() );
+        employeeResponse.phoneNumber( employee.getPhoneNumber() );
 
         return employeeResponse.build();
     }

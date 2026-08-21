@@ -12,8 +12,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-08-17T16:19:58+0530",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Oracle Corporation)"
+    date = "2026-08-21T13:14:55+0530",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.100.v20260624-0231, environment: Java 21.0.11 (Eclipse Adoptium)"
 )
 @Component
 public class TripMapperImpl implements TripMapper {
@@ -26,8 +26,8 @@ public class TripMapperImpl implements TripMapper {
 
         Route.RouteBuilder route = Route.builder();
 
-        route.organizationId( request.getOrganizationId() );
         route.name( request.getName() );
+        route.organizationId( request.getOrganizationId() );
 
         return route.build();
     }
@@ -41,8 +41,8 @@ public class TripMapperImpl implements TripMapper {
         RouteResponse.RouteResponseBuilder routeResponse = RouteResponse.builder();
 
         routeResponse.id( route.getId() );
-        routeResponse.organizationId( route.getOrganizationId() );
         routeResponse.name( route.getName() );
+        routeResponse.organizationId( route.getOrganizationId() );
         routeResponse.status( route.getStatus() );
 
         return routeResponse.build();
@@ -57,10 +57,10 @@ public class TripMapperImpl implements TripMapper {
         TripInstance.TripInstanceBuilder tripInstance = TripInstance.builder();
 
         tripInstance.route( tripRequestToRoute( request ) );
-        tripInstance.vehicleId( request.getVehicleId() );
         tripInstance.driverId( request.getDriverId() );
         tripInstance.scheduledStartTime( request.getScheduledStartTime() );
         tripInstance.status( request.getStatus() );
+        tripInstance.vehicleId( request.getVehicleId() );
 
         return tripInstance.build();
     }
@@ -74,13 +74,13 @@ public class TripMapperImpl implements TripMapper {
         TripResponse.TripResponseBuilder tripResponse = TripResponse.builder();
 
         tripResponse.routeId( tripInstanceRouteId( tripInstance ) );
-        tripResponse.id( tripInstance.getId() );
-        tripResponse.vehicleId( tripInstance.getVehicleId() );
-        tripResponse.driverId( tripInstance.getDriverId() );
-        tripResponse.scheduledStartTime( tripInstance.getScheduledStartTime() );
-        tripResponse.actualStartTime( tripInstance.getActualStartTime() );
         tripResponse.actualEndTime( tripInstance.getActualEndTime() );
+        tripResponse.actualStartTime( tripInstance.getActualStartTime() );
+        tripResponse.driverId( tripInstance.getDriverId() );
+        tripResponse.id( tripInstance.getId() );
+        tripResponse.scheduledStartTime( tripInstance.getScheduledStartTime() );
         tripResponse.status( tripInstance.getStatus() );
+        tripResponse.vehicleId( tripInstance.getVehicleId() );
 
         return tripResponse.build();
     }
