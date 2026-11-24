@@ -5,7 +5,7 @@ spring:
   application:
     name: fleetbridge-org-service
   datasource:
-    url: jdbc:postgresql://127.0.0.1:5432/fleetbridge_org_db
+    url: jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5433}/fleetbridge_org_db
     username: fleetbridge_user
     password: fleetbridge_password
     driver-class-name: org.postgresql.Driver
@@ -25,5 +25,5 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          issuer-uri: http://localhost:8080/realms/fleetbridge-master
-          jwk-set-uri: http://localhost:8080/realms/fleetbridge-master/protocol/openid-connect/certs
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/fleetbridge-master
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/fleetbridge-master/protocol/openid-connect/certs

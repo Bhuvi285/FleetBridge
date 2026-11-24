@@ -385,9 +385,9 @@ Defined in `docker-compose-dev.yml`:
 
 | Container Name | Service Image | Host Port | Internal Port | Environment / Volumes |
 | :--- | :--- | :---: | :---: | :--- |
-| `fleetbridge-postgres` | `postgres:16-alpine` | `5432` | `5432` | Volume `pgdata`, init script `./init-db.sql` |
+| `fleetbridge-postgres` | `postgres:16-alpine` | `5433` | `5432` | Volume `pgdata`, init script `./init-db.sql` |
 | `fleetbridge-redis` | `redis:7.2-alpine` | `6379` | `6379` | Volume `redisdata` |
-| `fleetbridge-keycloak` | `quay.io/keycloak/keycloak:24.0` | `8080` | `8080` | Connected to `keycloak_db`, volume `./keycloak-import` |
+| `fleetbridge-keycloak` | `quay.io/keycloak/keycloak:24.0` | `8180` | `8080` | Connected to `keycloak_db`, volume `./keycloak-import` |
 | `fleetbridge-kafka` | `confluentinc/cp-kafka:7.5.0` | `9092` | `9092` | KRaft mode (no Zookeeper), volume `kafkadata` |
 
 ---
@@ -515,18 +515,18 @@ During the initial inspection on this new laptop, several environment difference
 * **Resolution:** Docker Desktop started and active.
 * **Verification:** `docker ps` verified running.
 
-### 4. Port 5432 Conflict with Windows Service [RESOLVED]
-* **Resolution:** Local Windows service `postgresql-x64-18` stopped (`Stop-Service postgresql-x64-18`).
-* **Verification:** Port 5432 bound successfully by Docker container `fleetbridge-postgres`.
+### 4. Non-Conflicting Host Port Isolation [RESOLVED]
+* **Resolution:** Mapped PostgreSQL container host port to `5433:5432` and Keycloak container host port to `8180:8080`.
+* **Coexistence:** The local Windows `postgresql` service (on port 5432) and any parallel IntelliJ/Tomcat projects (on port 8080) can run concurrently without port collisions. FleetBridge services default to `5433` and `8180`.
 
 ### 5. Missing Database in `init-db.sql` [RESOLVED]
 * **Resolution:** Added `CREATE DATABASE fleetbridge_boarding_db;` to `init-db.sql`.
 * **Verification:** PostgreSQL container initialized all 7 databases (`fleetbridge_boarding_db`, `fleetbridge_fleet_db`, `fleetbridge_gps_db`, `fleetbridge_master`, `fleetbridge_org_db`, `fleetbridge_trip_db`, `keycloak_db`).
 
 ### 6. Infrastructure Container Health [VERIFIED ACTIVE]
-* `fleetbridge-postgres` (:5432) — Up & Healthy
+* `fleetbridge-postgres` (:5433 host, :5432 container) — Up & Healthy
 * `fleetbridge-redis` (:6379) — Up & Healthy
-* `fleetbridge-keycloak` (:8080) — Up & Realm `fleetbridge-master` Imported
+* `fleetbridge-keycloak` (:8180 host, :8080 container) — Up & Realm `fleetbridge-master` Imported
 * `fleetbridge-kafka` (:9092) — Up in KRaft mode & Healthy
 
 ### 7. Service Startup Verification [VERIFIED]
@@ -546,9 +546,10 @@ During the initial inspection on this new laptop, several environment difference
 | System | `PATH` | Must include `%JAVA_HOME%\bin`, Node.js, and Maven |
 | Microservices | `SPRING_DATASOURCE_USERNAME` | `fleetbridge_user` |
 | Microservices | `SPRING_DATASOURCE_PASSWORD` | `fleetbridge_password` |
-| Microservices | Keycloak Issuer URI | `http://localhost:8080/realms/fleetbridge-master` |
+| Microservices | `DB_PORT` | `5433` (isolated from default 5432) |
+| Microservices | Keycloak Issuer URI (`KEYCLOAK_URL`) | `http://localhost:8180/realms/fleetbridge-master` |
 | Trip / Notification | Kafka Bootstrap Servers | `localhost:9092` |
-| Web Portal | Keycloak Issuer | `http://localhost:8080/realms/fleetbridge-master` (or via proxy) |
+| Web Portal | Keycloak Issuer | `http://localhost:8180/realms/fleetbridge-master` (via proxy `proxy.conf.json`) |
 
 ---
 
@@ -557,11 +558,7 @@ During the initial inspection on this new laptop, several environment difference
 ### Step 1: Resolve Environment Prerequisites
 1. **Install JDK 21:** Download and install Eclipse Adoptium Temurin 21. Set `JAVA_HOME` to JDK 21.
 2. **Install Node.js LTS:** Download and install Node.js 20.x or 22.x (includes npm).
-3. **Stop Local PostgreSQL Service:**
-   ```powershell
-   Stop-Service postgresql-x64-18 -Force
-   ```
-4. **Start Docker Desktop:** Launch Docker Desktop from the Start menu and verify it is running (`docker ps`).
+3. **Start Docker Desktop:** Launch Docker Desktop from the Start menu and verify it is running (`docker ps`). Note: Local PostgreSQL (port 5432) can remain running undisturbed since FleetBridge maps to port `5433`.
 
 ### Step 2: Initialize Infrastructure Containers
 From project root (`D:\Central Projects Hub\FleetBridge`):
@@ -569,9 +566,9 @@ From project root (`D:\Central Projects Hub\FleetBridge`):
 docker compose -f docker-compose-dev.yml up -d
 ```
 Verify all four containers are healthy:
-* `fleetbridge-postgres` (:5432)
+* `fleetbridge-postgres` (:5433)
 * `fleetbridge-redis` (:6379)
-* `fleetbridge-keycloak` (:8080)
+* `fleetbridge-keycloak` (:8180)
 * `fleetbridge-kafka` (:9092)
 
 ### Step 3: Build Backend Microservices
