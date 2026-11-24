@@ -169,6 +169,24 @@ import { AddRouteDialogComponent } from './components/add-route-dialog/add-route
             <ng-container matColumnDef="actions">
               <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
               <td mat-cell *matCellDef="let row" class="text-right">
+                @if (row.status === 'SCHEDULED') {
+                  <button mat-icon-button class="action-btn start"
+                    matTooltip="Start Trip (ACTIVE)" (click)="changeTripStatus(row, 'ACTIVE')">
+                    <mat-icon style="color: #34d399;">play_arrow</mat-icon>
+                  </button>
+                }
+                @if (row.status === 'ACTIVE') {
+                  <button mat-icon-button class="action-btn complete"
+                    matTooltip="Complete Trip" (click)="changeTripStatus(row, 'COMPLETED')">
+                    <mat-icon style="color: #60a5fa;">check_circle</mat-icon>
+                  </button>
+                }
+                @if (row.status === 'SCHEDULED' || row.status === 'ACTIVE') {
+                  <button mat-icon-button class="action-btn cancel"
+                    matTooltip="Cancel Trip" (click)="changeTripStatus(row, 'CANCELLED')">
+                    <mat-icon style="color: #f87171;">cancel</mat-icon>
+                  </button>
+                }
                 <button mat-icon-button class="action-btn edit"
                   matTooltip="Edit Trip" (click)="openEditTripDialog(row)">
                   <mat-icon>edit</mat-icon>
@@ -922,6 +940,23 @@ export class TripsComponent implements OnInit, OnDestroy {
     this.tripService.deleteTrip(id).subscribe({
       next: () => { this.toast.success('Trip deleted.'); this.loadAll(); },
       error: () => this.toast.error('Failed to delete trip.')
+    });
+  }
+
+  changeTripStatus(trip: TripResponse, newStatus: string): void {
+    const actionLabel = newStatus === 'ACTIVE' ? 'start' : newStatus === 'COMPLETED' ? 'complete' : 'cancel';
+    if (!confirm(`Are you sure you want to ${actionLabel} this trip?`)) return;
+
+    this.tripService.updateTripStatus(trip.id, newStatus).subscribe({
+      next: (updatedTrip) => {
+        trip.status = newStatus;
+        this.applyTripFilter();
+        this.toast.success(`Trip status updated to ${newStatus}`);
+      },
+      error: (err: any) => {
+        console.error('Failed to update trip status', err);
+        this.toast.error(`Failed to update trip status to ${newStatus}`);
+      }
     });
   }
 

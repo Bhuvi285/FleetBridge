@@ -1,0 +1,222 @@
+services:
+  # Infrastructure
+  postgres:
+    image: postgres:16-alpine
+    container_name: fleetbridge-postgres
+    environment:
+      POSTGRES_USER: fleetbridge_user
+      POSTGRES_PASSWORD: fleetbridge_password
+      POSTGRES_DB: fleetbridge_master
+    ports:
+      - "${DB_PORT:-5433}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: fleetbridge-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: fleetbridge-keycloak
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak_db
+      KC_DB_USERNAME: fleetbridge_user
+      KC_DB_PASSWORD: fleetbridge_password
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+    ports:
+      - "${KEYCLOAK_PORT:-8180}:8080"
+    volumes:
+      - ./keycloak-import:/opt/keycloak/data/import
+    command: start-dev --import-realm
+    depends_on:
+      - postgres
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  kafka:
+    image: confluentinc/cp-kafka:7.5.0
+    container_name: fleetbridge-kafka
+    ports:
+      - "9092:9092"
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: 'CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT'
+      KAFKA_ADVERTISED_LISTENERS: 'PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092'
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_PROCESS_ROLES: 'broker,controller'
+      KAFKA_CONTROLLER_QUORUM_VOTERS: '1@kafka:29093'
+      KAFKA_LISTENERS: 'PLAINTEXT://kafka:29092,CONTROLLER://kafka:29093,PLAINTEXT_HOST://0.0.0.0:9092'
+      KAFKA_INTER_BROKER_LISTENER_NAME: 'PLAINTEXT'
+      KAFKA_CONTROLLER_LISTENER_NAMES: 'CONTROLLER'
+      KAFKA_LOG_DIRS: '/tmp/kraft-combined-logs'
+      CLUSTER_ID: 'MkU3OEVBNTcwNTJENDM2Qk'
+    volumes:
+      - kafkadata:/var/lib/kafka/data
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  # Core Services
+  api-gateway:
+    build:
+      context: ./fleetbridge-api-gateway
+    container_name: fleetbridge-api-gateway
+    ports:
+      - "9090:9090"
+    environment:
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  org-service:
+    build:
+      context: ./fleetbridge-org-service
+    container_name: fleetbridge-org-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  fleet-service:
+    build:
+      context: ./fleetbridge-fleet-service
+    container_name: fleetbridge-fleet-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  trip-service:
+    build:
+      context: ./fleetbridge-trip-service
+    container_name: fleetbridge-trip-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KEYCLOAK_URL: http://keycloak:8080
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+    depends_on:
+      - postgres
+      - kafka
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  gps-service:
+    build:
+      context: ./fleetbridge-gps-service
+    container_name: fleetbridge-gps-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  boarding-service:
+    build:
+      context: ./fleetbridge-boarding-service
+    container_name: fleetbridge-boarding-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - redis
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  notification-service:
+    build:
+      context: ./fleetbridge-notification-service
+    container_name: fleetbridge-notification-service
+    environment:
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - kafka
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  billing-service:
+    build:
+      context: ./fleetbridge-billing-service
+    container_name: fleetbridge-billing-service
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      KAFKA_BOOTSTRAP_SERVERS: kafka:29092
+      KEYCLOAK_URL: http://keycloak:8080
+    depends_on:
+      - postgres
+      - kafka
+      - keycloak
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+  web-portal:
+    build:
+      context: ./fleetbridge-web-portal
+    container_name: fleetbridge-web-portal
+    ports:
+      - "4200:80"
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+    networks:
+      - fleetbridge-network
+
+networks:
+  fleetbridge-network:
+    driver: bridge
+
+volumes:
+  pgdata:
+  redisdata:
+  kafkadata:

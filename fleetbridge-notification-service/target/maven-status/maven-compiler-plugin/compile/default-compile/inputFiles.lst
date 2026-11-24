@@ -1,6 +1,7 @@
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\application\service\EmailService.java
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\application\kafka\TripEventListener.java
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\presentation\NotificationController.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\application\service\RecipientResolverService.java
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\application\service\NotificationService.java
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\application\dto\NotificationRequest.java
 D:\Central Projects Hub\FleetBridge\fleetbridge-notification-service\src\main\java\com\fleetbridge\notification\NotificationServiceApplication.java

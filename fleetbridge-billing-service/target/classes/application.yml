@@ -1,0 +1,45 @@
+server:
+  port: 8086
+
+spring:
+  application:
+    name: fleetbridge-billing-service
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:127.0.0.1}:${DB_PORT:5433}/fleetbridge_billing_db
+    username: fleetbridge_user
+    password: fleetbridge_password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/fleetbridge-master
+          jwk-set-uri: ${KEYCLOAK_URL:http://localhost:8180}/realms/fleetbridge-master/protocol/openid-connect/certs
+
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: fleetbridge-billing-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      properties:
+        spring.json.trusted.packages: "com.fleetbridge.common.events"
+
+fleetbridge:
+  services:
+    trip-service-url: ${TRIP_SERVICE_URL:http://localhost:8083}
+
+logging:
+  level:
+    com.fleetbridge.billing: DEBUG

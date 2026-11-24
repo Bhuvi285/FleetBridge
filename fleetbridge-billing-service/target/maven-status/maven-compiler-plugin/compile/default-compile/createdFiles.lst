@@ -1,0 +1,15 @@
+com\fleetbridge\billing\infrastructure\config\SecurityConfig.class
+com\fleetbridge\billing\application\dto\InvoiceResponse.class
+com\fleetbridge\billing\application\dto\InvoiceRequest$InvoiceRequestBuilder.class
+com\fleetbridge\billing\application\dto\InvoiceRequest.class
+com\fleetbridge\billing\application\service\BillingService.class
+com\fleetbridge\billing\domain\entity\ContractRate.class
+com\fleetbridge\billing\BillingServiceApplication.class
+com\fleetbridge\billing\domain\entity\Invoice$InvoiceBuilder.class
+com\fleetbridge\billing\infrastructure\repository\ContractRateRepository.class
+com\fleetbridge\billing\domain\entity\ContractRate$ContractRateBuilder.class
+com\fleetbridge\billing\application\kafka\BillingTripEventListener.class
+com\fleetbridge\billing\application\dto\InvoiceResponse$InvoiceResponseBuilder.class
+com\fleetbridge\billing\presentation\controller\BillingController.class
+com\fleetbridge\billing\domain\entity\Invoice.class
+com\fleetbridge\billing\infrastructure\repository\InvoiceRepository.class

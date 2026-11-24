@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: com.fleetbridge.billing.application.service.BillingServiceTest
+-------------------------------------------------------------------------------
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 2.464 s -- in com.fleetbridge.billing.application.service.BillingServiceTest

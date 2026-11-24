@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fleetbridge-config
+  namespace: fleetbridge
+data:
+  DB_HOST: "postgres.fleetbridge.svc.cluster.local"
+  DB_PORT: "5432"
+  REDIS_HOST: "redis.fleetbridge.svc.cluster.local"
+  REDIS_PORT: "6379"
+  KAFKA_BOOTSTRAP_SERVERS: "kafka.fleetbridge.svc.cluster.local:9092"
+  KEYCLOAK_URL: "http://keycloak.fleetbridge.svc.cluster.local:8080"
+  TRIP_SERVICE_URL: "http://trip-service.fleetbridge.svc.cluster.local:8083"
+  FLEET_SERVICE_URL: "http://fleet-service.fleetbridge.svc.cluster.local:8082"

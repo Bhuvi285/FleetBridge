@@ -2,13 +2,15 @@ package com.fleetbridge.notification.application.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fleetbridge.common.events.TripStatusChangedEvent;
+import com.fleetbridge.notification.application.service.EmailService;
+import com.fleetbridge.notification.application.service.RecipientResolverService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
-import com.fleetbridge.notification.application.service.EmailService;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
@@ -17,6 +19,7 @@ public class TripEventListener {
 
     private final ObjectMapper objectMapper;
     private final EmailService emailService;
+    private final RecipientResolverService recipientResolverService;
 
     @KafkaListener(topics = "trip-events", groupId = "fleetbridge-notification-group")
     public void handleTripEvent(ConsumerRecord<String, String> record) {
@@ -36,40 +39,52 @@ public class TripEventListener {
 
         log.info("🔄 Trip [{}] status changed: {} → {}", tripId, oldStatus, newStatus);
 
+        String subject;
+        String body;
+
         switch (newStatus) {
-            case "SCHEDULED" -> sendNotification(
-                "New Trip Scheduled",
-                "A new trip [" + tripId + "] has been scheduled for route [" + event.getRouteId() + "]."
-            );
-            case "ACTIVE" -> sendNotification(
-                "Trip Is Now Active",
-                "Trip [" + tripId + "] is underway! Vehicle [" + event.getVehicleId() + "] is now on the road."
-            );
-            case "COMPLETED" -> sendNotification(
-                "Trip Completed Successfully",
-                "Trip [" + tripId + "] has been completed. Employees have arrived at their destination."
-            );
-            case "CANCELLED" -> sendNotification(
-                "⚠️ Trip Cancelled",
-                "ALERT: Trip [" + tripId + "] has been cancelled. Please make alternative arrangements."
-            );
-            default -> log.warn("⚠️ Unhandled trip status '{}' for trip [{}]. No notification sent.", newStatus, tripId);
+            case "SCHEDULED" -> {
+                subject = "New Trip Scheduled";
+                body = String.format("A new trip [%s] has been scheduled for route [%s] with driver [%s].",
+                        tripId, event.getRouteId(), event.getDriverId());
+            }
+            case "ACTIVE" -> {
+                subject = "Trip Is Now Active";
+                body = String.format("Trip [%s] is underway! Vehicle [%s] is currently in transit on route [%s].",
+                        tripId, event.getVehicleId(), event.getRouteId());
+            }
+            case "COMPLETED" -> {
+                subject = "Trip Completed Successfully";
+                body = String.format("Trip [%s] has been completed successfully. All passengers arrived at their destination.",
+                        tripId);
+            }
+            case "CANCELLED" -> {
+                subject = "⚠️ Trip Cancelled";
+                body = String.format("ALERT: Trip [%s] has been cancelled. Please check the FleetBridge dashboard for details.",
+                        tripId);
+            }
+            default -> {
+                log.warn("⚠️ Unhandled trip status '{}' for trip [{}]. No notification sent.", newStatus, tripId);
+                return;
+            }
         }
+
+        sendNotifications(event.getDriverId(), subject, body);
     }
 
     /**
-     * Sends an email notification using SendGrid.
+     * Resolves target recipients and sends notification.
      */
-    private void sendNotification(String subject, String body) {
+    private void sendNotifications(String driverId, String subject, String body) {
+        List<String> recipients = recipientResolverService.resolveRecipientsForTrip(driverId);
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        log.info("📧 [NOTIFICATION SERVICE] Processing notification:");
+        log.info("📧 [NOTIFICATION SERVICE] Dispatching to {} recipient(s):", recipients.size());
         log.info("   Subject : {}", subject);
-        log.info("   Body    : {}", body);
+        log.info("   Recipients: {}", recipients);
         log.info("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
-        
-        // In a real system, we'd look up the Organization Admin's email or the Driver's email based on the trip.
-        // For demonstration, we send it to a mock admin email.
-        String recipientEmail = "admin@fleetbridge.io"; 
-        emailService.sendEmail(recipientEmail, subject, body);
+
+        for (String recipient : recipients) {
+            emailService.sendEmail(recipient, subject, body);
+        }
     }
 }
