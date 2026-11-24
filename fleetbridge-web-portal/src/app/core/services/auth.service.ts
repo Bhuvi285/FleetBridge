@@ -11,13 +11,15 @@ export interface AuthUser {
 }
 
 const oAuthConfig: AuthConfig = {
-  issuer: 'http://localhost:8080/realms/fleetbridge-master',
+  issuer: window.location.origin + '/realms/fleetbridge-master',
   redirectUri: window.location.origin + '/dashboard',
   clientId: 'fleetbridge-web',
   responseType: 'code',
   scope: 'openid profile email',
   showDebugInformation: true,
-  requireHttps: false // For local development only
+  requireHttps: false, // For local development only
+  skipIssuerCheck: true,
+  strictDiscoveryDocumentValidation: false
 };
 
 @Injectable({ providedIn: 'root' })

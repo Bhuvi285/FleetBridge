@@ -59,7 +59,7 @@ export const routes: Routes = [
         path: 'tracking',
         canActivate: [roleGuard],
         data: { roles: ['SUPER_ADMIN', 'TRAVEL_ADMIN', 'ORG_ADMIN'] },
-        loadComponent: () => import('./trips/trips.component').then(m => m.TripsComponent)
+        loadComponent: () => import('./tracking/live-map.component').then(m => m.LiveMapComponent)
       },
       // ── Organizations ──
       {

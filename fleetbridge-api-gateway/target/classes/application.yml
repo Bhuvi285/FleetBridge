@@ -27,11 +27,15 @@ spring:
           uri: ws://localhost:8084
           predicates:
             - Path=/ws/telemetry/**
+        - id: boarding-service
+          uri: http://localhost:8085
+          predicates:
+            - Path=/api/v1/boarding/**
       
       globalcors:
         corsConfigurations:
           '[/**]':
-            allowedOrigins: "http://localhost:4200"
+            allowedOriginPatterns: "*"
             allowedMethods:
               - GET
               - POST

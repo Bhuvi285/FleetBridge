@@ -11,8 +11,8 @@ export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
   
   const token = oauthStorage.getItem('access_token');
 
-  // Only attach token to requests going to our API Gateway
-  if (token && req.url.startsWith(environment.apiBaseUrl)) {
+  // Attach token to all API requests
+  if (token && req.url.startsWith('/api/')) {
     req = req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`,

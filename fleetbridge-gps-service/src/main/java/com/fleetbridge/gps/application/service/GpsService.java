@@ -57,7 +57,7 @@ public class GpsService {
      * Fetch the latest GPS ping for a given trip (current vehicle position).
      */
     public ApiResponse<GpsLocationResponse> getLatestLocation(UUID tripId) {
-        return gpsLocationRepository.findLatestByTripId(tripId)
+        return gpsLocationRepository.findFirstByTripIdOrderByRecordedAtDesc(tripId)
                 .map(loc -> ApiResponse.success(toResponse(loc), "Latest location retrieved"))
                 .orElse(ApiResponse.error("No location data found for this trip"));
     }

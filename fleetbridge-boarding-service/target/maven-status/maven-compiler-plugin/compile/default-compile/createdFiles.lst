@@ -1,0 +1,11 @@
+com\fleetbridge\boarding\infrastructure\repository\BoardingLogRepository.class
+com\fleetbridge\boarding\application\service\QrService.class
+com\fleetbridge\boarding\application\dto\BoardingScanResponse$BoardingScanResponseBuilder.class
+com\fleetbridge\boarding\application\service\BoardingService.class
+com\fleetbridge\boarding\domain\entity\BoardingLog$BoardingLogBuilder.class
+com\fleetbridge\boarding\application\dto\BoardingScanResponse.class
+com\fleetbridge\boarding\BoardingServiceApplication.class
+com\fleetbridge\boarding\domain\entity\BoardingLog.class
+com\fleetbridge\boarding\presentation\controller\BoardingController.class
+com\fleetbridge\boarding\infrastructure\config\SecurityConfig.class
+com\fleetbridge\boarding\application\dto\BoardingScanRequest.class

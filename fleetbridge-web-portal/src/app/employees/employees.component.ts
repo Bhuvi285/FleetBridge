@@ -9,6 +9,7 @@ import { OrgService } from '../core/services/org.service';
 import { EmployeeResponse } from '../core/models/organization.model';
 import { ToastService } from '../core/services/toast.service';
 import { AddEmployeeDialogComponent } from './components/add-employee-dialog/add-employee-dialog.component';
+import { EmployeeQrDialogComponent } from './components/employee-qr-dialog/employee-qr-dialog.component';
 
 @Component({
   selector: 'app-employees',
@@ -76,6 +77,9 @@ import { AddEmployeeDialogComponent } from './components/add-employee-dialog/add
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef class="text-right">Actions</th>
           <td mat-cell *matCellDef="let row" class="text-right">
+            <button mat-icon-button class="action-btn" (click)="openQrDialog(row)" title="View Boarding Pass">
+              <mat-icon>qr_code</mat-icon>
+            </button>
             <button mat-icon-button class="action-btn" (click)="openEditDialog(row)" title="Edit">
               <mat-icon>edit</mat-icon>
             </button>
@@ -154,9 +158,24 @@ export class EmployeesComponent implements OnInit {
   }
 
   openAddDialog(): void {
-    this.dialog.open(AddEmployeeDialogComponent, {
-      width: '600px', disableClose: true, panelClass: 'glass-dialog'
-    }).afterClosed().subscribe(result => { if (result) this.loadEmployees(); });
+    const dialogRef = this.dialog.open(AddEmployeeDialogComponent, {
+      width: '500px',
+      panelClass: 'dark-dialog'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.loadEmployees();
+      }
+    });
+  }
+
+  openQrDialog(employee: EmployeeResponse): void {
+    this.dialog.open(EmployeeQrDialogComponent, {
+      width: '350px',
+      data: employee,
+      panelClass: 'dark-dialog'
+    });
   }
 
   openEditDialog(employee: EmployeeResponse): void {

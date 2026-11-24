@@ -7,5 +7,6 @@ com\fleetbridge\gps\presentation\controller\GpsController.class
 com\fleetbridge\gps\application\dto\GpsLocationResponse$GpsLocationResponseBuilder.class
 com\fleetbridge\gps\application\service\GpsService.class
 com\fleetbridge\gps\application\dto\GpsLocationRequest.class
+com\fleetbridge\gps\infrastructure\config\CorsConfig.class
 com\fleetbridge\gps\domain\entity\GpsLocation$GpsLocationBuilder.class
 com\fleetbridge\gps\application\dto\GpsLocationResponse.class

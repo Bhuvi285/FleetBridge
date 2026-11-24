@@ -1,4 +1,4 @@
-D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\events\TripStatusChangedEvent.java
-D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\exception\ErrorResponse.java
-D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\exception\GlobalExceptionHandler.java
-D:\Skills Learning\Central Project Hub\Java Projects\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\dto\ApiResponse.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\exception\ErrorResponse.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\exception\GlobalExceptionHandler.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\events\TripStatusChangedEvent.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-common\src\main\java\com\fleetbridge\common\dto\ApiResponse.java

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, Subject } from 'rxjs';
 import { map } from 'rxjs/operators';
-import { Client, IMessage } from '@stomp/stompjs';
+import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 import { environment } from '../../../environments/environment';
 
@@ -35,34 +35,41 @@ export class GpsService {
   private readonly wsUrl = `http://localhost:8084/ws/telemetry`;
 
   private stompClient: Client | null = null;
+  private isConnected = false;
+
+  /** Single subject for single-trip use (driver PWA) */
   private locationSubject = new Subject<GpsLocationResponse>();
+
+  /** Multi-trip subjects for the Live Map */
+  private tripSubjects = new Map<string, Subject<GpsLocationResponse>>();
+  private tripSubs = new Map<string, StompSubscription>();
 
   constructor(private http: HttpClient) {}
 
-  /** Ingest a GPS ping (called by driver app / simulation) */
+  // ── REST Endpoints ──
+
   ingestLocation(request: GpsLocationRequest): Observable<GpsLocationResponse> {
     return this.http.post<any>(`${this.baseUrl}/ingest`, request).pipe(
       map(r => r.data)
     );
   }
 
-  /** Get the latest (current) GPS ping for a trip */
   getLatestLocation(tripId: string): Observable<GpsLocationResponse> {
     return this.http.get<any>(`${this.baseUrl}/trips/${tripId}/latest`).pipe(
       map(r => r.data)
     );
   }
 
-  /** Get the full trail (all pings) for a trip — used for polyline */
   getTripTrail(tripId: string): Observable<GpsLocationResponse[]> {
     return this.http.get<any>(`${this.baseUrl}/trips/${tripId}/trail`).pipe(
       map(r => r.data)
     );
   }
 
-  /** Connect to WebSocket and subscribe to live updates for a trip */
+  // ── Single-Trip WebSocket (used by Driver PWA) ──
+
   subscribeToTrip(tripId: string): Observable<GpsLocationResponse> {
-    this.disconnect(); // clean up any previous connection
+    this.disconnect();
 
     this.stompClient = new Client({
       webSocketFactory: () => new SockJS(this.wsUrl),
@@ -82,11 +89,75 @@ export class GpsService {
     return this.locationSubject.asObservable();
   }
 
-  /** Disconnect WebSocket */
+  // ── Multi-Trip WebSocket (used by Admin Live Map) ──
+
+  /** Ensure the shared STOMP connection is alive */
+  private ensureConnected(): Promise<void> {
+    if (this.isConnected && this.stompClient?.connected) {
+      return Promise.resolve();
+    }
+
+    return new Promise((resolve) => {
+      this.stompClient = new Client({
+        webSocketFactory: () => new SockJS(this.wsUrl),
+        reconnectDelay: 5000,
+        onConnect: () => {
+          this.isConnected = true;
+          resolve();
+        },
+        onStompError: (frame) => {
+          console.error('STOMP error', frame);
+        },
+        onDisconnect: () => {
+          this.isConnected = false;
+        }
+      });
+      this.stompClient.activate();
+    });
+  }
+
+  /** Subscribe to live GPS pings for a specific trip (additive, does not kill other subs) */
+  async watchTrip(tripId: string): Promise<Observable<GpsLocationResponse>> {
+    await this.ensureConnected();
+
+    // Already watching this trip
+    if (this.tripSubjects.has(tripId)) {
+      return this.tripSubjects.get(tripId)!.asObservable();
+    }
+
+    const subject = new Subject<GpsLocationResponse>();
+    this.tripSubjects.set(tripId, subject);
+
+    const sub = this.stompClient!.subscribe(`/topic/trip/${tripId}`, (msg: IMessage) => {
+      const location: GpsLocationResponse = JSON.parse(msg.body);
+      subject.next(location);
+    });
+    this.tripSubs.set(tripId, sub);
+
+    return subject.asObservable();
+  }
+
+  /** Stop watching a specific trip */
+  unwatchTrip(tripId: string): void {
+    this.tripSubs.get(tripId)?.unsubscribe();
+    this.tripSubs.delete(tripId);
+    this.tripSubjects.get(tripId)?.complete();
+    this.tripSubjects.delete(tripId);
+  }
+
+  /** Disconnect everything */
   disconnect(): void {
+    // Clean up multi-trip subs
+    this.tripSubs.forEach(sub => sub.unsubscribe());
+    this.tripSubs.clear();
+    this.tripSubjects.forEach(sub => sub.complete());
+    this.tripSubjects.clear();
+
     if (this.stompClient?.connected) {
       this.stompClient.deactivate();
     }
     this.stompClient = null;
+    this.isConnected = false;
   }
 }
+

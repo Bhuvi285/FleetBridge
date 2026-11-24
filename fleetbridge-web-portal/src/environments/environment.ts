@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
-  apiBaseUrl: 'http://127.0.0.1:9090',
+  apiBaseUrl: '',
   appName: 'FleetBridge',
 };

@@ -1,0 +1,9 @@
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\infrastructure\repository\BoardingLogRepository.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\application\dto\BoardingScanRequest.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\application\service\BoardingService.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\application\dto\BoardingScanResponse.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\domain\entity\BoardingLog.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\presentation\controller\BoardingController.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\application\service\QrService.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\BoardingServiceApplication.java
+D:\Central Projects Hub\FleetBridge\fleetbridge-boarding-service\src\main\java\com\fleetbridge\boarding\infrastructure\config\SecurityConfig.java

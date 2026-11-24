@@ -7,13 +7,14 @@ import { GpsService } from '../../core/services/gps.service';
 import { TripResponse } from '../../core/models/trip.model';
 import { ToastService } from '../../core/services/toast.service';
 import { ToastContainerComponent } from '../../shared/toast-container/toast-container.component';
+import { QrScannerComponent } from './qr-scanner.component';
 import { forkJoin, Subscription, interval } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 
 @Component({
   selector: 'app-driver-dashboard',
   standalone: true,
-  imports: [CommonModule, ToastContainerComponent],
+  imports: [CommonModule, ToastContainerComponent, QrScannerComponent],
   template: `
     <app-toast-container />
 
@@ -43,8 +44,8 @@ import { switchMap } from 'rxjs/operators';
         </div>
       }
 
-      <!-- Content -->
-      <div class="driver-content">
+      <!-- Home Content -->
+      <div class="driver-content" [class.d-none]="selectedTab() !== 'home'">
         @if (isLoading()) {
           <div class="loading-state">
             <div class="spinner"></div>
@@ -132,13 +133,26 @@ import { switchMap } from 'rxjs/operators';
         }
       </div>
 
+      <!-- Scanner Content -->
+      <div class="driver-content" [class.d-none]="selectedTab() !== 'scanner'">
+        @if (activeTrip(); as trip) {
+          <app-qr-scanner [tripId]="trip.id" />
+        } @else {
+          <div class="empty-state">
+            <div class="empty-icon">⚠️</div>
+            <div class="empty-title">No Active Trip</div>
+            <div class="empty-sub">You must start a trip before you can scan boarding passes.</div>
+          </div>
+        }
+      </div>
+
       <!-- Bottom Nav -->
       <div class="bottom-nav">
-        <div class="nav-item active-nav">
+        <div class="nav-item" [class.active-nav]="selectedTab() === 'home'" (click)="selectedTab.set('home')">
           <span>🏠</span><span>Home</span>
         </div>
-        <div class="nav-item">
-          <span>📍</span><span>Map</span>
+        <div class="nav-item" [class.active-nav]="selectedTab() === 'scanner'" (click)="selectedTab.set('scanner')">
+          <span>📷</span><span>Scanner</span>
         </div>
         <div class="nav-item">
           <span>📋</span><span>History</span>
@@ -363,6 +377,7 @@ import { switchMap } from 'rxjs/operators';
     }
     .nav-item span:first-child { font-size: 1.25rem; }
     .nav-item.active-nav { color: #818cf8; }
+    .d-none { display: none !important; }
   `]
 })
 export class DriverDashboardComponent implements OnInit, OnDestroy {
@@ -372,6 +387,7 @@ export class DriverDashboardComponent implements OnInit, OnDestroy {
   private toast = inject(ToastService);
   private router = inject(Router);
 
+  selectedTab = signal<'home' | 'scanner'>('home');
   isLoading = signal(true);
   isTracking = signal(false);
   lastCoords = signal<{ lat: number; lng: number } | null>(null);
